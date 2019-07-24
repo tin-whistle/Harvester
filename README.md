@@ -6,6 +6,8 @@ A Swift interface to the Harvest time tracking API
 
 See the [Harvest API V2 Documentation](https://help.getharvest.com/api-v2/) to learn how the Harvest REST API is structured.
 
+### Authentication
+
 [Authentication](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/) is done using the OAuth 2 standard. The Harvester library uses the [Authorization Code flow](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/#oauth2-authorization-flow) option. The Harvester example project uses the [OAuthSwift](https://github.com/OAuthSwift/OAuthSwift) library, but you may choose to use another library or write your own implementation. The only requirement is that your OAuth library must conform to the [OAuthProvider](Sources/Harvester/OAuthProvider.swift) protocol.
 
 Any app which wishes to use the Harvest API must first be [registered](https://id.getharvest.com/developers) with Harvest (requires a Harvest account).
