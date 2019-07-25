@@ -32,7 +32,7 @@ In order for Harvester to make authorized requests to the Harvest API, it must h
 
 ### Configuration
 
-[HarvestAPI]() is the main point of contact with the Harvester library. It is initialized with a [HarvestAPIConfiguration]() containing the following properties:
+[HarvestAPI](Sources/Harvester/HarvestAPI.swift) is the main point of contact with the Harvester library. It is initialized with a [HarvestAPIConfiguration](Sources/Harvester/HarvestAPIConfiguration.swift) containing the following properties:
 1. **appName** - The name of your app. This is sent to Harvest as part of a user agent string. It is used to identify which app a request came from.
 2. **contactEmail** - The email address which Harvest should use to contact you with questions or comments. This is sent to Harvest as part of a user agent string.
 3. **oauthProvider** - Your OAuthProvider implementation (see OAuthProvider section above).
