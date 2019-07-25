@@ -3,7 +3,6 @@ import Harvester
 import UIKit
 
 struct MainView : View {
-    var authorizationParentViewController: UIViewController
     @ObjectBinding var harvest: HarvestAPI
     
     var body: some View {
@@ -11,7 +10,7 @@ struct MainView : View {
             List {
                 if !harvest.isAuthorized {
                     Button(action: {
-                        self.harvest.authorizeWithViewController(self.authorizationParentViewController) { _ in }
+                        self.harvest.authorize { _ in }
                     }) {
                         Text("Authorize with Harvest")
                     }
@@ -35,8 +34,7 @@ struct MainView : View {
 #if DEBUG
 struct MainView_Previews : PreviewProvider {
     static var previews: some View {
-        MainView(authorizationParentViewController: UIViewController(),
-                    harvest: HarvestAPI(oauthProvider: OAuthProviderStub(isAuthorized: false)))
+        MainView(harvest: HarvestAPI(configuration: HarvestAPIConfiguration(appName: "Harvester Example", contactEmail: "harvester@tinwhistlellc.com", oauthProvider: OAuthProviderStub(isAuthorized: false))))
     }
 }
 #endif

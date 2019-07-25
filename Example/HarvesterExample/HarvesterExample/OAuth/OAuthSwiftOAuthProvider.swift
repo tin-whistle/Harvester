@@ -6,6 +6,8 @@ class OAuthSwiftOAuthProvider: OAuthProvider {
     private let oauthSwift: OAuth2Swift
     private let redirectURL: URL
     
+    var authorizationParentViewController: UIViewController?
+
     init(oauthSwift: OAuth2Swift, redirectURL: URL) {
         self.oauthSwift = oauthSwift
         self.redirectURL = redirectURL
@@ -20,21 +22,26 @@ class OAuthSwiftOAuthProvider: OAuthProvider {
         return !oauthSwift.client.credential.oauthToken.isEmpty
     }
 
-    public func authorizeWithViewController(_ viewController: UIViewController, completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
-        oauthSwift.authorizeURLHandler = SafariURLHandler(viewController: viewController, oauthSwift: oauthSwift)
+    public func authorize(completion: @escaping (_ result: Result<Bool, Error>) -> Void) {
+        guard let authorizationParentViewController = authorizationParentViewController else {
+            completion(.failure(OAuthError.misconfigured("OAuthSwiftOAuthProvider must have an authorizationParentViewController set before authorization.")))
+            return
+        }
+        
+        oauthSwift.authorizeURLHandler = SafariURLHandler(viewController: authorizationParentViewController, oauthSwift: oauthSwift)
         oauthSwift.authorize(withCallbackURL: redirectURL, scope: "", state: "") { [weak self] result in
             switch result {
             case let .success(token):
                 do {
                     try self?.setCredential(token.credential)
                     completion(.success(self?.isAuthorized ?? false))
-                } catch HarvestError.security(let errorString) {
-                    completion(.failure(HarvestError.security(errorString)))
+                } catch OAuthError.security(let errorString) {
+                    completion(.failure(OAuthError.security(errorString)))
                 } catch {
-                    completion(.failure(.unknown(error)))
+                    completion(.failure(OAuthError.unknown(error)))
                 }
             case let .failure(error):
-                completion(.failure(.oauth(error)))
+                completion(.failure(OAuthError.oauth(error)))
             }
         }
     }
@@ -43,10 +50,6 @@ class OAuthSwiftOAuthProvider: OAuthProvider {
         try setCredential(nil)
         oauthSwift.client.credential.oauthToken = ""
         oauthSwift.client.credential.oauthTokenSecret = ""
-    }
-    
-    public func handleAuthorizationRedirectURL(_ url: URL) {
-        OAuthSwift.handle(url: url)
     }
     
     public func sendAuthorizedRequest(_ url: URL, method: HTTPMethod, headers: [String : String], body: Data?, completion: @escaping (Result<Data, Error>) -> Void) {
@@ -74,6 +77,16 @@ class OAuthSwiftOAuthProvider: OAuthProvider {
     }
 }
 
+// MARK: - Errors
+
+public enum OAuthError: Error {
+    case misconfigured(String)
+    case unknown(Error)
+    case security(String)
+    case oauth(Error)
+}
+
+
 // MARK: - Persistence
 
 extension OAuthSwiftOAuthProvider {
@@ -87,7 +100,7 @@ extension OAuthSwiftOAuthProvider {
             do {
                 return try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSCoding
             } catch {
-                throw HarvestError.security("Failed to read credentials.")
+                throw OAuthError.security("Failed to read credentials.")
             }
         default:
             return nil
@@ -100,7 +113,7 @@ extension OAuthSwiftOAuthProvider {
             case errSecSuccess:
                 return
             default:
-                throw HarvestError.security("Failed to delete credentials.")
+                throw OAuthError.security("Failed to delete credentials.")
             }
         }
         
@@ -122,12 +135,12 @@ extension OAuthSwiftOAuthProvider {
             case errSecSuccess:
                 return
             default:
-                throw HarvestError.security("Failed to update credentials.")
+                throw OAuthError.security("Failed to update credentials.")
             }
         case errSecSuccess:
             return
         default:
-            throw HarvestError.security("Failed to save credentials.")
+            throw OAuthError.security("Failed to save credentials.")
         }
     }
     

@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol NetworkRequest {
+protocol NetworkRequest {
     associatedtype Response: Decodable
 
     var endpoint: NetworkEndpoint { get }

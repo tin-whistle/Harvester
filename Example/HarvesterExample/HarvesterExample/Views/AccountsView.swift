@@ -28,7 +28,7 @@ struct AccountsView : View {
 #if DEBUG
 struct AccountsView_Previews : PreviewProvider {
     static var previews: some View {
-        AccountsView(harvest: HarvestAPI(oauthProvider: OAuthProviderStub(isAuthorized: false)))
+        AccountsView(harvest: HarvestAPI(configuration: HarvestAPIConfiguration(appName: "Harvester Example", contactEmail: "harvester@tinwhistlellc.com", oauthProvider: OAuthProviderStub(isAuthorized: false))))
     }
 }
 #endif

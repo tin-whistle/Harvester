@@ -6,6 +6,7 @@ import OAuthSwift
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var harvest: HarvestAPI?
+    var oauthProvider: OAuthSwiftOAuthProvider?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -16,10 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                       accessTokenUrl: "https://id.getharvest.com/api/v2/oauth2/token",
                                       responseType: "code")
         oauth2Swift.allowMissingStateCheck = true
-        let oauthProvider = OAuthSwiftOAuthProvider(oauthSwift: oauth2Swift,
-                                                    redirectURL: URL(string: "https://www.tinwhistlellc.com/harvester-oauth2-callback")!)
-
-        harvest = HarvestAPI(oauthProvider: oauthProvider)
+        oauthProvider = OAuthSwiftOAuthProvider(oauthSwift: oauth2Swift,
+                                                redirectURL: URL(string: "https://www.tinwhistlellc.com/harvester-oauth2-callback")!)
+        if let oauthProvider = oauthProvider {
+            let configuration = HarvestAPIConfiguration(appName: "Harvester Example", contactEmail: "harvester@tinwhistlellc.com", oauthProvider: oauthProvider)
+            harvest = HarvestAPI(configuration: configuration)
+        }
 
         return true
     }
@@ -45,7 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return false
         }
 
-        harvest?.handleAuthorizationRedirectURL(url)
+        OAuthSwift.handle(url: url)
 
         return true
     }

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105322D9B0A700BB4D28 /* AccountsView.swift */; };
 		8B46105622D9B7BF00BB4D28 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105522D9B7BF00BB4D28 /* AccountView.swift */; };
+		8B5C641122E95B290087DE19 /* OAuthProviderStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */; };
 		8B65421722E16CA9004E3665 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B65421622E16CA9004E3665 /* UserView.swift */; };
 		8B710BC622CD77FB00CF5D75 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B710BC522CD77FB00CF5D75 /* AppDelegate.swift */; };
 		8B710BC822CD77FB00CF5D75 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B710BC722CD77FB00CF5D75 /* SceneDelegate.swift */; };
@@ -43,6 +44,7 @@
 /* Begin PBXFileReference section */
 		8B46105322D9B0A700BB4D28 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		8B46105522D9B7BF00BB4D28 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthProviderStub.swift; sourceTree = "<group>"; };
 		8B65421622E16CA9004E3665 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
 		8B710BC222CD77FB00CF5D75 /* HarvesterExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HarvesterExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B710BC522CD77FB00CF5D75 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -159,6 +161,7 @@
 			isa = PBXGroup;
 			children = (
 				8B710C0422CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift */,
+				8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */,
 			);
 			path = OAuth;
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 				8B710BC622CD77FB00CF5D75 /* AppDelegate.swift in Sources */,
 				8B710C0522CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift in Sources */,
 				8B710BC822CD77FB00CF5D75 /* SceneDelegate.swift in Sources */,
+				8B5C641122E95B290087DE19 /* OAuthProviderStub.swift in Sources */,
 				8B46105622D9B7BF00BB4D28 /* AccountView.swift in Sources */,
 				8B710BCA22CD77FB00CF5D75 /* MainView.swift in Sources */,
 				8B65421722E16CA9004E3665 /* UserView.swift in Sources */,

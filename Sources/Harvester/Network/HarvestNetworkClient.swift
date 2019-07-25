@@ -1,34 +1,38 @@
 import UIKit
 
-public struct HarvestNetworkClient: NetworkClient {
+struct HarvestNetworkClient: NetworkClient {
     private let baseURLString = "https://api.harvestapp.com/v2"
-    private let userAgent = "Harvester iOS SDK (harvester@tinwhistlellc.com)"
+    private let userAgent: String
     private var oauthProvider: OAuthProvider
     
-    public var accountID: Int?
+    var accountID: Int?
     
-    public init(oauthProvider: OAuthProvider) {
-        self.oauthProvider = oauthProvider
+    init(configuration: HarvestAPIConfiguration) {
+        self.oauthProvider = configuration.oauthProvider
+        userAgent = "\(configuration.appName) (\(configuration.contactEmail))"
     }
 }
 
 // MARK: AuthorizedNetworkClient
 
 extension HarvestNetworkClient: AuthorizedNetworkClient {
-    public var isAuthorized: Bool {
+    var isAuthorized: Bool {
         return oauthProvider.isAuthorized
     }
     
-    public func authorizeWithViewController(_ viewController: UIViewController, completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
-        oauthProvider.authorizeWithViewController(viewController, completion: completion)
+    func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
+        oauthProvider.authorize { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(.oauth(error)))
+            case .success(let authorized):
+                completion(.success(authorized))
+            }
+        }
     }
     
-    public func deauthorize() throws {
+    func deauthorize() throws {
         try oauthProvider.deauthorize()
-    }
-    
-    public func handleAuthorizationRedirectURL(_ url: URL) {
-        oauthProvider.handleAuthorizationRedirectURL(url)
     }
 }
 
@@ -36,11 +40,11 @@ extension HarvestNetworkClient: AuthorizedNetworkClient {
 
 extension HarvestNetworkClient {
     
-    public var baseURL: URL {
+    var baseURL: URL {
         return URL(string: baseURLString)!
     }
     
-    public func send<T: NetworkRequest, U>(_ request: T, completion: @escaping (Result<U, HarvestError>) -> Void) where U == T.Response {
+    func send<T: NetworkRequest, U>(_ request: T, completion: @escaping (Result<U, HarvestError>) -> Void) where U == T.Response {
         guard isAuthorized else {
             completion(.failure(HarvestError.unauthorized))
             return

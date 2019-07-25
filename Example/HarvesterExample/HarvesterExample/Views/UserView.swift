@@ -42,7 +42,7 @@ struct UserView: View {
 #if DEBUG
 struct UserView_Previews: PreviewProvider {
     static var previews: some View {
-        UserView(harvest: HarvestAPI(oauthProvider: OAuthProviderStub(isAuthorized: false)))
+        UserView(harvest: HarvestAPI(configuration: HarvestAPIConfiguration(appName: "Harvester Example", contactEmail: "harvester@tinwhistlellc.com", oauthProvider: OAuthProviderStub(isAuthorized: false))))
     }
 }
 #endif

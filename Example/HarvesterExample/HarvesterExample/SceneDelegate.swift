@@ -1,7 +1,7 @@
 import UIKit
 import SwiftUI
 import Harvester
-
+import OAuthSwift
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -16,15 +16,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
 
-            guard let harvest = (UIApplication.shared.delegate as? AppDelegate)?.harvest else {
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+                  let harvest = appDelegate.harvest,
+                  let oauthProvider = appDelegate.oauthProvider else {
                 fatalError("Failed to find HarvestAPI.")
             }
 
-            // Create the main view and do some monkey business to give it a reference to it's hosting controller.
-            var mainView = MainView(authorizationParentViewController: UIViewController(), harvest: harvest)
-            let hostingController = UIHostingController(rootView: mainView)
-            mainView.authorizationParentViewController = hostingController
-            hostingController.rootView = mainView
+            // Create the main view and give the app delegate's oauth provider a reference to its view controller.
+            let hostingController = UIHostingController(rootView: MainView(harvest: harvest))
+            oauthProvider.authorizationParentViewController = hostingController
             window.rootViewController = hostingController
             self.window = window
             window.makeKeyAndVisible()
@@ -65,7 +65,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         }
 
-        (UIApplication.shared.delegate as? AppDelegate)?.harvest?.handleAuthorizationRedirectURL(url)
+        OAuthSwift.handle(url: url)
     }
 }
 

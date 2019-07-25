@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol NetworkClient {
+protocol NetworkClient {
     var baseURL: URL { get }
     
     func send<T: NetworkRequest, U>(_ request: T, completion: @escaping (Result<U, HarvestError>) -> Void) where U == T.Response

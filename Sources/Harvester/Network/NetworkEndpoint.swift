@@ -1,6 +1,6 @@
 import Foundation
 
-public enum NetworkEndpoint {
+enum NetworkEndpoint {
     case fullURL(URL)
     case pathFromBaseURL(String)
 }

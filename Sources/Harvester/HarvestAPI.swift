@@ -18,8 +18,8 @@ public class HarvestAPI: BindableObject {
         return networkClient.isAuthorized
     }
     
-    public func authorizeWithViewController(_ viewController: UIViewController, completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
-        networkClient.authorizeWithViewController(viewController) { [weak self] result in
+    public func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
+        networkClient.authorize { [weak self] result in
             self?.willChange.send()
             completion(result)
         }
@@ -29,11 +29,7 @@ public class HarvestAPI: BindableObject {
         willChange.send()
         try networkClient.deauthorize()
     }
-    
-    public func handleAuthorizationRedirectURL(_ url: URL) {
-        networkClient.handleAuthorizationRedirectURL(url)
-    }
-    
+
     // MARK: Request Data
     
     public func getAccounts(completion: @escaping (Result<[HarvestAccount], HarvestError>) -> Void) {
@@ -62,8 +58,8 @@ public class HarvestAPI: BindableObject {
     
     // MARK: Initialization
     
-    public init(oauthProvider: OAuthProvider) {
-        self.networkClient = HarvestNetworkClient(oauthProvider: oauthProvider)
+    public init(configuration: HarvestAPIConfiguration) {
+        self.networkClient = HarvestNetworkClient(configuration: configuration)
     }
     
     // MARK: BindableObject
