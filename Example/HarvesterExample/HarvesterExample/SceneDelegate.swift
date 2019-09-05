@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
 
             // Create the main view and give the app delegate's oauth provider a reference to its view controller.
-            let hostingController = UIHostingController(rootView: MainView(harvest: harvest))
+            let hostingController = UIHostingController(rootView: MainView<HarvestAPI>().environmentObject(harvest))
             oauthProvider.authorizationParentViewController = hostingController
             window.rootViewController = hostingController
             self.window = window

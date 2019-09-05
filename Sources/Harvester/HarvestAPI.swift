@@ -2,7 +2,7 @@ import UIKit
 import SwiftUI
 import Combine
 
-public class HarvestAPI: BindableObject {
+public class HarvestAPI: ObservableObject {
 
     private var networkClient: AuthorizedNetworkClient
     
@@ -20,13 +20,13 @@ public class HarvestAPI: BindableObject {
     
     public func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
         networkClient.authorize { [weak self] result in
-            self?.willChange.send()
+            self?.objectWillChange.send()
             completion(result)
         }
     }
     
     public func deauthorize() throws {
-        willChange.send()
+        objectWillChange.send()
         try networkClient.deauthorize()
     }
 
@@ -42,14 +42,16 @@ public class HarvestAPI: BindableObject {
         networkClient.send(UserRequest(userID: "me"), completion: completion)
     }
     
-    public func getMyProjectAssignments(completion: @escaping (Result<[HarvestProjectAssignment], HarvestError>) -> Void) {
+    public func getProjectAssignments(completion: @escaping (Result<[HarvestProjectAssignment], HarvestError>) -> Void) {
         networkClient.send(UserProjectAssignmentsRequest(userID: "me")) {
             completion($0.map { $0.projectAssignments })
         }
     }
     
-    public func getTimeEntries(_ completion: @escaping (Result<TimeEntriesResponse, HarvestError>) -> Void) {
-        networkClient.send(TimeEntriesRequest(), completion: completion)
+    public func getTimeEntries(_ completion: @escaping (Result<[HarvestTimeEntry], HarvestError>) -> Void) {
+        networkClient.send(TimeEntriesRequest()) {
+           completion($0.map { $0.timeEntries })
+        }
     }
     
     public func getCompany(_ completion: @escaping (Result<HarvestCompany, HarvestError>) -> Void) {
@@ -63,5 +65,5 @@ public class HarvestAPI: BindableObject {
     }
     
     // MARK: BindableObject
-    public var willChange = PassthroughSubject<Void, Never>()
+    public var objectWillChange = PassthroughSubject<Void, Never>()
 }

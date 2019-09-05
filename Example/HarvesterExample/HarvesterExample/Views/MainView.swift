@@ -2,8 +2,8 @@ import SwiftUI
 import Harvester
 import UIKit
 
-struct MainView : View {
-    @ObjectBinding var harvest: HarvestAPI
+struct MainView<T: Harvest> : View {
+    @EnvironmentObject var harvest: T
     
     var body: some View {
         NavigationView {
@@ -22,7 +22,7 @@ struct MainView : View {
                     }
                 }
                 if harvest.isAuthorized {
-                    NavigationLink(destination: AccountsView(harvest: harvest)) {
+                    NavigationLink(destination: AccountsView<T>()) {
                         Text("Get Accounts")
                     }
                 }
@@ -34,7 +34,8 @@ struct MainView : View {
 #if DEBUG
 struct MainView_Previews : PreviewProvider {
     static var previews: some View {
-        MainView(harvest: HarvestAPI(configuration: HarvestAPIConfiguration(appName: "Harvester Example", contactEmail: "harvester@tinwhistlellc.com", oauthProvider: OAuthProviderStub(isAuthorized: false))))
+        MainView<HarvestAPI>()
+            .environmentObject(PreviewHarvest())
     }
 }
 #endif

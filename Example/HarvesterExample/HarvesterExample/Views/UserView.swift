@@ -3,9 +3,9 @@ import Foundation
 import Harvester
 import SwiftUI
 
-struct UserView: View {
-    let harvest: HarvestAPI
-    @State var user: HarvestUser?
+struct UserView<T: Harvest>: View {
+    @EnvironmentObject var harvest: T
+    @State var user: HarvestUser? = nil
     @State var image = UIImage()
     
     private var userName: String {
@@ -42,7 +42,8 @@ struct UserView: View {
 #if DEBUG
 struct UserView_Previews: PreviewProvider {
     static var previews: some View {
-        UserView(harvest: HarvestAPI(configuration: HarvestAPIConfiguration(appName: "Harvester Example", contactEmail: "harvester@tinwhistlellc.com", oauthProvider: OAuthProviderStub(isAuthorized: false))))
+        UserView<HarvestAPI>()
+            .environmentObject(PreviewHarvest())
     }
 }
 #endif
