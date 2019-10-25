@@ -11,6 +11,8 @@
 		8B0C32EB23075E3600A56D03 /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0C32EA23075E3600A56D03 /* TasksView.swift */; };
 		8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105322D9B0A700BB4D28 /* AccountsView.swift */; };
 		8B46105622D9B7BF00BB4D28 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105522D9B7BF00BB4D28 /* AccountView.swift */; };
+		8B57D08D233F10AF008EAB43 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B57D08C233F10AF008EAB43 /* ExploreView.swift */; };
+		8B593B902354083C005C3A26 /* SelectAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B593B8F2354083C005C3A26 /* SelectAccountView.swift */; };
 		8B5C641122E95B290087DE19 /* OAuthProviderStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */; };
 		8B60C5BA23208A11009030A6 /* TimeEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60C5B923208A11009030A6 /* TimeEntriesView.swift */; };
 		8B60C5BC23209126009030A6 /* CompanyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60C5BB23209126009030A6 /* CompanyView.swift */; };
@@ -51,6 +53,8 @@
 		8B0C32EA23075E3600A56D03 /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
 		8B46105322D9B0A700BB4D28 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		8B46105522D9B7BF00BB4D28 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		8B57D08C233F10AF008EAB43 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
+		8B593B8F2354083C005C3A26 /* SelectAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAccountView.swift; sourceTree = "<group>"; };
 		8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthProviderStub.swift; sourceTree = "<group>"; };
 		8B60C5B923208A11009030A6 /* TimeEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEntriesView.swift; sourceTree = "<group>"; };
 		8B60C5BB23209126009030A6 /* CompanyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyView.swift; sourceTree = "<group>"; };
@@ -204,7 +208,9 @@
 				8B46105522D9B7BF00BB4D28 /* AccountView.swift */,
 				8B60C5BB23209126009030A6 /* CompanyView.swift */,
 				8B710BC922CD77FB00CF5D75 /* MainView.swift */,
+				8B57D08C233F10AF008EAB43 /* ExploreView.swift */,
 				8B0C32E823075BB600A56D03 /* ProjectsView.swift */,
+				8B593B8F2354083C005C3A26 /* SelectAccountView.swift */,
 				8B0C32EA23075E3600A56D03 /* TasksView.swift */,
 				8B60C5B923208A11009030A6 /* TimeEntriesView.swift */,
 				8B65421622E16CA9004E3665 /* UserView.swift */,
@@ -350,6 +356,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B57D08D233F10AF008EAB43 /* ExploreView.swift in Sources */,
 				8B60C5BA23208A11009030A6 /* TimeEntriesView.swift in Sources */,
 				8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */,
 				8BF414CC230E41AB002BBE9A /* Harvest.swift in Sources */,
@@ -362,6 +369,7 @@
 				8B710BCA22CD77FB00CF5D75 /* MainView.swift in Sources */,
 				8B60C5BC23209126009030A6 /* CompanyView.swift in Sources */,
 				8B65421722E16CA9004E3665 /* UserView.swift in Sources */,
+				8B593B902354083C005C3A26 /* SelectAccountView.swift in Sources */,
 				8B0C32EB23075E3600A56D03 /* TasksView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -5,7 +5,7 @@ struct HarvestNetworkClient: NetworkClient {
     private let userAgent: String
     private var oauthProvider: OAuthProvider
     
-    var accountID: Int?
+    var accountId: Int?
     
     init(configuration: HarvestAPIConfiguration) {
         self.oauthProvider = configuration.oauthProvider
@@ -52,7 +52,7 @@ extension HarvestNetworkClient {
         
         var url = urlFrom(request)
         var bodyData: Data? = nil
-        var headers = ["Harvest-Account-Id": "\(accountID ?? 0)", "User-Agent": userAgent]
+        var headers = ["Harvest-Account-Id": "\(accountId ?? 0)", "User-Agent": userAgent]
         
         switch request.method {
         case .delete:

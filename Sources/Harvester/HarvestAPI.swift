@@ -4,13 +4,19 @@ import Combine
 
 public class HarvestAPI: ObservableObject {
 
+    private var localStorage: LocalStorage
     private var networkClient: AuthorizedNetworkClient
     
     // MARK: Authorization
     
-    public var currentAccount: HarvestAccount? {
-        didSet {
-            networkClient.accountID = currentAccount?.id
+    public var currentAccountId: Int? {
+        get {
+            localStorage.accountId
+        }
+        set {
+            objectWillChange.send()
+            networkClient.accountId = newValue
+            localStorage.accountId = newValue
         }
     }
     
@@ -19,15 +25,26 @@ public class HarvestAPI: ObservableObject {
     }
     
     public func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
-        networkClient.authorize { [weak self] result in
-            self?.objectWillChange.send()
-            completion(result)
+        networkClient.authorize { [weak self] authorizeResult in
+            if self?.isAuthorized ?? false {
+                self?.getAccounts { result in
+                    if case let .success(accounts) = result, accounts.count == 1 {
+                        self?.currentAccountId = accounts[0].id
+                    }
+                    self?.objectWillChange.send()
+                    completion(authorizeResult)
+                }
+            } else {
+                self?.objectWillChange.send()
+                completion(authorizeResult)
+            }
         }
     }
     
     public func deauthorize() throws {
         objectWillChange.send()
         try networkClient.deauthorize()
+        currentAccountId = nil
     }
 
     // MARK: Request Data
@@ -60,10 +77,14 @@ public class HarvestAPI: ObservableObject {
     
     // MARK: Initialization
     
-    public init(configuration: HarvestAPIConfiguration) {
+    public init(configuration: HarvestAPIConfiguration,
+                localStorage: LocalStorage = DefaultLocalStorage()) {
+        self.localStorage = localStorage
         self.networkClient = HarvestNetworkClient(configuration: configuration)
+        self.networkClient.accountId = currentAccountId
+
     }
     
-    // MARK: BindableObject
+    // MARK: ObservableObject
     public var objectWillChange = PassthroughSubject<Void, Never>()
 }

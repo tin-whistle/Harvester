@@ -2,7 +2,7 @@ import Combine
 import Harvester
 
 protocol Harvest: ObservableObject {
-    var currentAccount: HarvestAccount? { get set }
+    var currentAccountId: Int? { get set }
     var isAuthorized: Bool { get }
     func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void)
     func deauthorize() throws
@@ -18,7 +18,7 @@ extension HarvestAPI: Harvest {
 }
 
 class PreviewHarvest: Harvest {
-    var currentAccount: HarvestAccount?
+    var currentAccountId: Int?
     
     var isAuthorized = false
     

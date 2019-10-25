@@ -42,7 +42,7 @@ struct UserView<T: Harvest>: View {
 #if DEBUG
 struct UserView_Previews: PreviewProvider {
     static var previews: some View {
-        UserView<HarvestAPI>()
+        UserView<PreviewHarvest>()
             .environmentObject(PreviewHarvest())
     }
 }

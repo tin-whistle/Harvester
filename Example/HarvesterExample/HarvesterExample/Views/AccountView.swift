@@ -21,7 +21,7 @@ struct AccountView<T: Harvest> : View {
         }
         .navigationBarTitle(account.name)
         .onAppear {
-            self.harvest.currentAccount = self.account
+            self.harvest.currentAccountId = self.account.id
         }
     }
 }
@@ -29,8 +29,9 @@ struct AccountView<T: Harvest> : View {
 #if DEBUG
 struct AccountView_Previews : PreviewProvider {
     static var previews: some View {
-        AccountView<HarvestAPI>(account: HarvestAccount(id: 0, name: "My Account", product: .harvest))
+        let view = AccountView<PreviewHarvest>(account: HarvestAccount(id: 0, name: "My Account", product: .harvest))
             .environmentObject(PreviewHarvest())
+        return view
     }
 }
 #endif

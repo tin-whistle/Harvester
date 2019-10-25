@@ -1,18 +1,21 @@
 import Harvester
 import SwiftUI
 
-struct AccountsView<T: Harvest> : View {
+struct SelectAccountView<T: Harvest> : View {
     @EnvironmentObject var harvest: T
     @State var accounts: [HarvestAccount] = []
     
     var body: some View {
         List {
             ForEach(accounts, id: \.id) { account in
-                NavigationLink(destination: AccountView<T>(account: account)) {
+                Button(action: {
+                    self.harvest.currentAccountId = account.id
+                }) {
                     Text(account.name)
                 }
             }
-        }.onAppear {
+        }
+        .onAppear {
             self.harvest.getAccounts { result in
                 switch result {
                 case let .success(accounts):
@@ -21,14 +24,15 @@ struct AccountsView<T: Harvest> : View {
                     break
                 }
             }
-        }.navigationBarTitle("Accounts")
+        }
+        .navigationBarTitle("Select Account")
     }
 }
 
 #if DEBUG
-struct AccountsView_Previews : PreviewProvider {
+struct SelectAccountView_Previews : PreviewProvider {
     static var previews: some View {
-        AccountsView<PreviewHarvest>()
+        SelectAccountView<PreviewHarvest>()
             .environmentObject(PreviewHarvest())
     }
 }

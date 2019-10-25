@@ -1,7 +1,7 @@
 import UIKit
 
 protocol AuthorizedNetworkClient: NetworkClient {
-    var accountID: Int? { get set }
+    var accountId: Int? { get set }
     
     var isAuthorized: Bool { get }
     

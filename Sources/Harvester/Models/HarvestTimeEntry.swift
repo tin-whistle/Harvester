@@ -8,11 +8,11 @@ public struct HarvestTimeEntry: Decodable {
     public let task: HarvestTask
 //    public let taskAssignment: HarvestTaskAssignment
     public let hours: Double
-    public let notes: String
+    public let notes: String?
 //    public let timerStartedAt: String
     public let startedTime: String?
     public let endedTime: String?
-//    public let isRunning: Bool
+    public let isRunning: Bool
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
@@ -26,6 +26,6 @@ public struct HarvestTimeEntry: Decodable {
 //        case timerStartedAt = "timer_started_at"
         case startedTime = "started_time"
         case endedTime = "ended_time"
-//        case isRunning = "is_running"
+        case isRunning = "is_running"
     }
 }

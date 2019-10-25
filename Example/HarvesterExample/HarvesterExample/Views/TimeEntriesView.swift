@@ -15,20 +15,24 @@ struct TimeEntriesView<T: Harvest> : View {
     var body: some View {
         List {
             ForEach(timeEntries, id: \.id) { timeEntry in
-                VStack(alignment: .leading) {
-                    Text(timeEntry.client.name)
-                        .font(.caption)
-                    Text(timeEntry.project.name)
-                        .font(.caption)
-                    Text(timeEntry.task.name)
-                        .font(.caption)
-                    Text(timeEntry.notes)
-                        .bold()
-                        .lineLimit(10)
-                        .font(.body)
+                HStack(alignment: .firstTextBaseline) {
+                    VStack(alignment: .leading) {
+                        Text(timeEntry.client.name)
+                            .font(.caption)
+                        Text(timeEntry.project.name)
+                            .font(.caption)
+                        Text(timeEntry.task.name)
+                            .font(.caption)
+                        Text(timeEntry.notes ?? "")
+                            .bold()
+                            .lineLimit(10)
+                            .font(.body)
+                    }.layoutPriority(1)
+                    Spacer()
                     Text("\(self.formatHours(timeEntry.hours))")
                         .font(.body)
-                        .italic()
+                        .bold()
+                        .foregroundColor(Color(timeEntry.isRunning ? .systemBlue : .label))
                 }
             }
         }.onAppear {
@@ -55,7 +59,7 @@ struct TimeEntriesView<T: Harvest> : View {
 #if DEBUG
 struct TimeEntriesView_Previews : PreviewProvider {
     static var previews: some View {
-        TimeEntriesView<HarvestAPI>()
+        TimeEntriesView<PreviewHarvest>()
             .environmentObject(PreviewHarvest())
     }
 }

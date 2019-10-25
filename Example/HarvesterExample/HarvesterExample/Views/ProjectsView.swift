@@ -28,7 +28,7 @@ struct ProjectsView<T: Harvest>: View {
 #if DEBUG
 struct ProjectsView_Previews: PreviewProvider {
     static var previews: some View {
-        ProjectsView<HarvestAPI>()
+        ProjectsView<PreviewHarvest>()
             .environmentObject(PreviewHarvest())
     }
 }
