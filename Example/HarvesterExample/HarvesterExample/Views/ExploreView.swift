@@ -1,13 +1,13 @@
 import SwiftUI
 import Harvester
 
-struct ExploreView<T: Harvest> : View {
-    @EnvironmentObject var harvest: T
+struct ExploreView : View {
+    @EnvironmentObject var harvest: HarvestState
 
     var body: some View {
         List {
             if harvest.isAuthorized {
-                NavigationLink(destination: AccountsView<T>()) {
+                NavigationLink(destination: AccountsView()) {
                     Text("Get Accounts")
                 }
             }
@@ -18,7 +18,7 @@ struct ExploreView<T: Harvest> : View {
 
 struct ExploreView_Previews: PreviewProvider {
     static var previews: some View {
-        ExploreView<PreviewHarvest>()
-            .environmentObject(PreviewHarvest())
+        ExploreView()
+            .environmentObject(HarvestState(api: PreviewHarvester()))
     }
 }

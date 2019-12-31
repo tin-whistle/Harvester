@@ -1,18 +1,18 @@
 import SwiftUI
 import Harvester
 
-struct MainView<T: Harvest> : View {
-    @EnvironmentObject var harvest: T
+struct MainView : View {
+    @EnvironmentObject var harvest: HarvestState
     
     @State private var modalSelection = ModalSelection.explore
     @State private var showModal = false
     @State private var showSheet = false
-    
-    var actionSheetButtons: [ActionSheet.Button] {
+
+    private var actionSheetButtons: [ActionSheet.Button] {
         var buttons: [ActionSheet.Button] = []
         if self.harvest.isAuthorized {
             buttons.append(.default(Text("Sign Out")) {
-                try? self.harvest.deauthorize()
+                self.harvest.deauthorize()
             })
             buttons.append(.default(Text("Select Account")) {
                 self.modalSelection = .selectAccount
@@ -24,7 +24,7 @@ struct MainView<T: Harvest> : View {
             })
         } else {
             buttons.append(.default(Text("Sign In")) {
-                self.harvest.authorize { _ in }
+                self.harvest.authorize()
             })
         }
         
@@ -32,47 +32,67 @@ struct MainView<T: Harvest> : View {
         
         return buttons
     }
-    
-    var navigationBarButton: some View {
+
+    var addButton: some View {
+        Button(action: {
+            self.modalSelection = .addTimeEntry
+            self.showModal = true
+        }) {
+            Image(systemName: "plus")
+                .frame(minWidth: 40, idealWidth: 60, minHeight: 40, alignment: .leading)
+        }
+    }
+
+    var setupButton: some View {
         Button(action: {
             self.showSheet = true
         }) {
             Text("Setup")
         }
     }
-    
+
     var body: some View {
         NavigationView {
-            if harvest.currentAccountId == nil {
-                List {
-                    Text("No Account Selected")
+            Passthrough {
+                if self.harvest.currentAccountId == nil {
+                    List {
+                        Text("No Account Selected")
+                    }
+                } else {
+                    TimeEntriesView()
                 }
-                .navigationBarTitle("Harvester")
-                .navigationBarItems(trailing: navigationBarButton)
-            } else {
-                TimeEntriesView<T>()
-                    .navigationBarTitle("Harvester")
-                    .navigationBarItems(trailing: navigationBarButton)
             }
+            .navigationBarTitle("Harvester")
+            .navigationBarItems(leading: harvest.isAuthorized ? addButton : nil, trailing: setupButton)
         }
         .actionSheet(isPresented: self.$showSheet) {
             ActionSheet(title: Text("Setup"), message: nil, buttons: self.actionSheetButtons)
         }
-        .sheet(isPresented: self.$showModal) {
-            if self.modalSelection == .explore {
+        .sheet(isPresented: self.$showModal, onDismiss: {
+            self.harvest.loadTimeEntries()
+        }) {
+            if self.modalSelection == .addTimeEntry {
                 NavigationView {
-                    ExploreView<T>().environmentObject(self.harvest)
+                    EditTimeEntryView(show: self.$showModal, originalTimeEntry: nil)
+                        .environmentObject(self.harvest)
+                }
+            } else if self.modalSelection == .explore {
+                NavigationView {
+                    ExploreView().environmentObject(self.harvest)
                 }
             } else {
                 NavigationView {
-                    SelectAccountView<T>().environmentObject(self.harvest)
+                    SelectAccountView(show: self.$showModal).environmentObject(self.harvest)
                 }
             }
         }
     }
+
+    
 }
 
 enum ModalSelection {
+    case addTimeEntry
     case explore
     case selectAccount
 }
@@ -80,8 +100,8 @@ enum ModalSelection {
 #if DEBUG
 struct MainView_Previews : PreviewProvider {
     static var previews: some View {
-        MainView<PreviewHarvest>()
-            .environmentObject(PreviewHarvest())
+        MainView()
+            .environmentObject(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

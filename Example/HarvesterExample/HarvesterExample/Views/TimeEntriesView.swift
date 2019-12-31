@@ -1,66 +1,97 @@
+import Combine
 import Harvester
 import SwiftUI
 
-struct TimeEntriesView<T: Harvest> : View {
-    @EnvironmentObject var harvest: T
-    @State var timeEntries: [HarvestTimeEntry] = []
-    
-    private let timeFormatter: DateComponentsFormatter = {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.hour, .minute]
-        formatter.zeroFormattingBehavior = .pad
-        return formatter
-    }()
-    
+struct TimeEntriesView : View {
+    @EnvironmentObject var harvest: HarvestState
+    @State private var timeSubscription: AnyCancellable?
+    @State private var timer = CombineTimer()
+
     var body: some View {
         List {
-            ForEach(timeEntries, id: \.id) { timeEntry in
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading) {
-                        Text(timeEntry.client.name)
-                            .font(.caption)
-                        Text(timeEntry.project.name)
-                            .font(.caption)
-                        Text(timeEntry.task.name)
-                            .font(.caption)
-                        Text(timeEntry.notes ?? "")
-                            .bold()
-                            .lineLimit(10)
-                            .font(.body)
-                    }.layoutPriority(1)
+            ForEach(harvest.timeEntryDates, id: \.timeIntervalSinceReferenceDate) { date in
+                Section(header: HStack {
+                    Text("\(DateFormatter.harvestDateFormatter.string(from: date))")
+                        .font(.headline)
                     Spacer()
-                    Text("\(self.formatHours(timeEntry.hours))")
-                        .font(.body)
-                        .bold()
-                        .foregroundColor(Color(timeEntry.isRunning ? .systemBlue : .label))
+                    Text("\((self.harvest.timeEntryTotalHoursByDate[date] ?? 0).formattedHours())")
+                        .font(.headline)
+                }) {
+                    ForEach(self.harvest.timeEntriesByDate[date] ?? [], id: \.id) { timeEntry in
+                        TimeEntryView(timeEntry: timeEntry)
+                    }
+                    .onDelete { indexSet in
+                        guard let firstValidIndex = indexSet.first(where: { $0 < self.harvest.timeEntries.count }) else { return }
+                        let entryToRemove = self.harvest.timeEntries[firstValidIndex]
+                        self.harvest.deleteTimeEntry(entryToRemove)
+                    }
                 }
             }
-        }.onAppear {
-            self.harvest.getTimeEntries { result in
-                switch result {
-                case let .success(timeEntries):
-                    self.timeEntries = timeEntries
-                case .failure:
-                    break
-                }
-            }
-        }.navigationBarTitle("Time Entries")
+        }
+        .onAppear {
+            self.harvest.loadTimeEntries()
+        }
+        .onReceive(timer.publisher) { _ in
+            self.harvest.loadTimeEntries()
+            self.timer.interval = self.harvest.timeEntries.contains { $0.isRunning } ? 5 : 15
+        }
+        .navigationBarTitle("Time Entries")
     }
 
-    private func formatHours(_ hours: Double) -> String {
-        let duration = Measurement(value: hours, unit: UnitDuration.hours)
-        let seconds = duration.converted(to: .seconds).value
-        var formatted = timeFormatter.string(from: seconds) ?? "?"
-        if formatted.hasPrefix("0") { formatted.removeFirst() }
-        return formatted
+    private func primaryActionButtonForTimeEntry(_ timeEntry: HarvestTimeEntry) -> some View {
+        return Button(action: {
+            if timeEntry.isRunning {
+                self.harvest.stopTimeEntry(timeEntry)
+            } else {
+                self.harvest.startTimeEntryWith(hours: 0,
+                                                notes: timeEntry.notes,
+                                                projectId: timeEntry.project.id,
+                                                spentDate: Date(),
+                                                taskId: timeEntry.task.id)
+            }
+        }) {
+            if timeEntry.isRunning {
+                Image(systemName: "xmark")
+                Text("Stop")
+            } else {
+                Image(systemName: "arrow.clockwise")
+                Text("Restart")
+            }
+        }
     }
 }
 
 #if DEBUG
 struct TimeEntriesView_Previews : PreviewProvider {
     static var previews: some View {
-        TimeEntriesView<PreviewHarvest>()
-            .environmentObject(PreviewHarvest())
+        TimeEntriesView()
+            .environmentObject(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif
+
+class CombineTimer {
+    private let intervalSubject: CurrentValueSubject<TimeInterval, Never>
+
+    var interval: TimeInterval {
+        get {
+            intervalSubject.value
+        }
+        set {
+            intervalSubject.send(newValue)
+        }
+    }
+
+    var publisher: AnyPublisher<Date, Never> {
+        intervalSubject
+            .map {
+                Timer.TimerPublisher(interval: $0, runLoop: .main, mode: .default).autoconnect()
+            }
+            .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+
+    init(interval: TimeInterval = 5.0) {
+        intervalSubject = CurrentValueSubject<TimeInterval, Never>(interval)
+    }
+}

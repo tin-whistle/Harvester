@@ -1,14 +1,14 @@
 import UIKit
 
 struct HarvestNetworkClient: NetworkClient {
+    private let authorizationProvider: AuthorizationProvider
     private let baseURLString = "https://api.harvestapp.com/v2"
     private let userAgent: String
-    private var oauthProvider: OAuthProvider
-    
+
     var accountId: Int?
     
     init(configuration: HarvestAPIConfiguration) {
-        self.oauthProvider = configuration.oauthProvider
+        self.authorizationProvider = configuration.authorizationProvider
         userAgent = "\(configuration.appName) (\(configuration.contactEmail))"
     }
 }
@@ -17,14 +17,14 @@ struct HarvestNetworkClient: NetworkClient {
 
 extension HarvestNetworkClient: AuthorizedNetworkClient {
     var isAuthorized: Bool {
-        return oauthProvider.isAuthorized
+        return authorizationProvider.accessToken != nil
     }
     
     func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
-        oauthProvider.authorize { result in
+        authorizationProvider.authorize { result in
             switch result {
             case .failure(let error):
-                completion(.failure(.oauth(error)))
+                completion(.failure(.authorization(error)))
             case .success(let authorized):
                 completion(.success(authorized))
             }
@@ -32,7 +32,7 @@ extension HarvestNetworkClient: AuthorizedNetworkClient {
     }
     
     func deauthorize() throws {
-        try oauthProvider.deauthorize()
+        try authorizationProvider.deauthorize()
     }
 }
 
@@ -52,7 +52,10 @@ extension HarvestNetworkClient {
         
         var url = urlFrom(request)
         var bodyData: Data? = nil
-        var headers = ["Harvest-Account-Id": "\(accountId ?? 0)", "User-Agent": userAgent]
+        var headers = [
+            "Harvest-Account-Id": "\(accountId ?? 0)",
+            "User-Agent": userAgent
+        ]
         
         switch request.method {
         case .delete:
@@ -75,20 +78,37 @@ extension HarvestNetworkClient {
                 }
             }
         }
-        
-        oauthProvider.sendAuthorizedRequest(url, method: request.method, headers: headers, body: bodyData) { result in
-            switch result {
-            case let .success(data):
-                do {
-                    print("Got response to \(url): \(String(data: data, encoding: .utf8) ?? "undecodable")")
-                    let response = try JSONDecoder().decode(T.Response.self, from: data)
-                    completion(.success(response))
-                } catch {
-                    completion(.failure(HarvestError.decoding(error)))
-                }
-            case let .failure(error):
-                completion(.failure(HarvestError.oauth(error)))
-            }
+
+        let id = UUID().uuidString
+        print("\(id): Sending \(request.method) \(url)")
+
+        if let accessToken = authorizationProvider.accessToken {
+            headers["Authorization"] = "Bearer \(accessToken)"
         }
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = request.method.rawValue
+        urlRequest.httpBody = bodyData
+        urlRequest.allHTTPHeaderFields = headers
+
+        URLSession.shared.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                completion(.failure(HarvestError.unknown(error)))
+                return
+            }
+
+            guard let data = data else {
+                completion(.failure(HarvestError.responseDataMissing))
+                return
+            }
+
+            do {
+                print("\(id): Got response: \(String(data: data, encoding: .utf8) ?? "undecodable")")
+                let response = try JSONDecoder().decode(T.Response.self, from: data)
+                completion(.success(response))
+            } catch {
+                completion(.failure(HarvestError.decoding(error)))
+            }
+        }.resume()
     }
 }

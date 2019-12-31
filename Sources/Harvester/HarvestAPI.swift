@@ -19,6 +19,15 @@ public class HarvestAPI: ObservableObject {
             localStorage.accountId = newValue
         }
     }
+
+    public private(set) var wantsTimestampTimers: Bool? {
+        get {
+            localStorage.wantsTimestampTimers
+        }
+        set {
+            localStorage.wantsTimestampTimers = newValue
+        }
+    }
     
     public var isAuthorized: Bool {
         return networkClient.isAuthorized
@@ -27,12 +36,20 @@ public class HarvestAPI: ObservableObject {
     public func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
         networkClient.authorize { [weak self] authorizeResult in
             if self?.isAuthorized ?? false {
-                self?.getAccounts { result in
-                    if case let .success(accounts) = result, accounts.count == 1 {
+                self?.getAccounts { getAccountsResult in
+                    if case let .success(accounts) = getAccountsResult, accounts.count == 1 {
                         self?.currentAccountId = accounts[0].id
+                        self?.getCompany { getCompanyResult in
+                            if case let .success(company) = getCompanyResult {
+                                self?.wantsTimestampTimers = company.wantsTimestampTimers
+                            }
+                            self?.objectWillChange.send()
+                            completion(authorizeResult)
+                        }
+                    } else {
+                        self?.objectWillChange.send()
+                        completion(authorizeResult)
                     }
-                    self?.objectWillChange.send()
-                    completion(authorizeResult)
                 }
             } else {
                 self?.objectWillChange.send()
@@ -45,6 +62,7 @@ public class HarvestAPI: ObservableObject {
         objectWillChange.send()
         try networkClient.deauthorize()
         currentAccountId = nil
+        wantsTimestampTimers = nil
     }
 
     // MARK: Request Data
@@ -74,7 +92,27 @@ public class HarvestAPI: ObservableObject {
     public func getCompany(_ completion: @escaping (Result<HarvestCompany, HarvestError>) -> Void) {
         networkClient.send(CompanyRequest(), completion: completion)
     }
-    
+
+    public func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
+        networkClient.send(StartTimeEntryRequest(hours: hours, notes: notes, projectId: projectId, spentDate: spentDate, taskId: taskId), completion: completion)
+    }
+
+    public func stopTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
+        networkClient.send(StopTimeEntryRequest(timeEntry: timeEntry), completion: completion)
+    }
+
+    public func restartTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
+        networkClient.send(RestartTimeEntryRequest(timeEntry: timeEntry), completion: completion)
+    }
+
+    public func deleteTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
+        networkClient.send(DeleteTimeEntryRequest(timeEntry: timeEntry), completion: completion)
+    }
+
+    public func updateTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
+        networkClient.send(UpdateTimeEntryRequest(timeEntry: timeEntry), completion: completion)
+    }
+
     // MARK: Initialization
     
     public init(configuration: HarvestAPIConfiguration,

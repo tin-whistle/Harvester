@@ -9,11 +9,12 @@
 /* Begin PBXBuildFile section */
 		8B0C32E923075BB600A56D03 /* ProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0C32E823075BB600A56D03 /* ProjectsView.swift */; };
 		8B0C32EB23075E3600A56D03 /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0C32EA23075E3600A56D03 /* TasksView.swift */; };
+		8B233D11236A9B3700BE7826 /* Passthrough.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B233D10236A9B3700BE7826 /* Passthrough.swift */; };
 		8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105322D9B0A700BB4D28 /* AccountsView.swift */; };
 		8B46105622D9B7BF00BB4D28 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105522D9B7BF00BB4D28 /* AccountView.swift */; };
 		8B57D08D233F10AF008EAB43 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B57D08C233F10AF008EAB43 /* ExploreView.swift */; };
 		8B593B902354083C005C3A26 /* SelectAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B593B8F2354083C005C3A26 /* SelectAccountView.swift */; };
-		8B5C641122E95B290087DE19 /* OAuthProviderStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */; };
+		8B59FF3023712B9F0010ADAB /* HarvesterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B59FF2F23712B9F0010ADAB /* HarvesterState.swift */; };
 		8B60C5BA23208A11009030A6 /* TimeEntriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60C5B923208A11009030A6 /* TimeEntriesView.swift */; };
 		8B60C5BC23209126009030A6 /* CompanyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60C5BB23209126009030A6 /* CompanyView.swift */; };
 		8B65421722E16CA9004E3665 /* UserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B65421622E16CA9004E3665 /* UserView.swift */; };
@@ -26,9 +27,10 @@
 		8B710BDD22CD77FD00CF5D75 /* HarvesterExampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B710BDC22CD77FD00CF5D75 /* HarvesterExampleTests.swift */; };
 		8B710BE822CD77FD00CF5D75 /* HarvesterExampleUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B710BE722CD77FD00CF5D75 /* HarvesterExampleUITests.swift */; };
 		8B710BF722CD78D300CF5D75 /* Harvester in Frameworks */ = {isa = PBXBuildFile; productRef = 8B710BF622CD78D300CF5D75 /* Harvester */; };
-		8B710C0522CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B710C0422CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift */; };
-		8B710C0822CD8D5500CF5D75 /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8B710C0722CD8D5500CF5D75 /* OAuthSwift */; };
-		8BF414CC230E41AB002BBE9A /* Harvest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF414CB230E41AB002BBE9A /* Harvest.swift */; };
+		8B79261223970E250068B559 /* TimeEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B79261123970E250068B559 /* TimeEntryView.swift */; };
+		8B792614239711BC0068B559 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B792613239711BC0068B559 /* Formatters.swift */; };
+		8BCCE4FE236B7A9E0085C97D /* EditTimeEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BCCE4FD236B7A9E0085C97D /* EditTimeEntryView.swift */; };
+		8BF414CC230E41AB002BBE9A /* Harvester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF414CB230E41AB002BBE9A /* Harvester.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,11 +53,12 @@
 /* Begin PBXFileReference section */
 		8B0C32E823075BB600A56D03 /* ProjectsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsView.swift; sourceTree = "<group>"; };
 		8B0C32EA23075E3600A56D03 /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
+		8B233D10236A9B3700BE7826 /* Passthrough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Passthrough.swift; sourceTree = "<group>"; };
 		8B46105322D9B0A700BB4D28 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		8B46105522D9B7BF00BB4D28 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		8B57D08C233F10AF008EAB43 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		8B593B8F2354083C005C3A26 /* SelectAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAccountView.swift; sourceTree = "<group>"; };
-		8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthProviderStub.swift; sourceTree = "<group>"; };
+		8B59FF2F23712B9F0010ADAB /* HarvesterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarvesterState.swift; sourceTree = "<group>"; };
 		8B60C5B923208A11009030A6 /* TimeEntriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEntriesView.swift; sourceTree = "<group>"; };
 		8B60C5BB23209126009030A6 /* CompanyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompanyView.swift; sourceTree = "<group>"; };
 		8B65421622E16CA9004E3665 /* UserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserView.swift; sourceTree = "<group>"; };
@@ -74,8 +77,10 @@
 		8B710BE722CD77FD00CF5D75 /* HarvesterExampleUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HarvesterExampleUITests.swift; sourceTree = "<group>"; };
 		8B710BE922CD77FD00CF5D75 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8B710BF822CD7DB600CF5D75 /* HarvesterExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HarvesterExample.entitlements; sourceTree = "<group>"; };
-		8B710C0422CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OAuthSwiftOAuthProvider.swift; sourceTree = "<group>"; };
-		8BF414CB230E41AB002BBE9A /* Harvest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Harvest.swift; sourceTree = "<group>"; };
+		8B79261123970E250068B559 /* TimeEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEntryView.swift; sourceTree = "<group>"; };
+		8B792613239711BC0068B559 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		8BCCE4FD236B7A9E0085C97D /* EditTimeEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTimeEntryView.swift; sourceTree = "<group>"; };
+		8BF414CB230E41AB002BBE9A /* Harvester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Harvester.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,7 +88,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B710C0822CD8D5500CF5D75 /* OAuthSwift in Frameworks */,
 				8B710BF722CD78D300CF5D75 /* Harvester in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -133,8 +137,7 @@
 				8B710BC722CD77FB00CF5D75 /* SceneDelegate.swift */,
 				8BFA40BA22E18D4A008B8BB6 /* Views */,
 				8B710C0622CD89F800CF5D75 /* Supporting Files */,
-				8BF414CA230E418F002BBE9A /* Harvest */,
-				8B710C0322CD89BF00CF5D75 /* OAuth */,
+				8BF414CA230E418F002BBE9A /* Harvester */,
 			);
 			path = HarvesterExample;
 			sourceTree = "<group>";
@@ -172,15 +175,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		8B710C0322CD89BF00CF5D75 /* OAuth */ = {
-			isa = PBXGroup;
-			children = (
-				8B710C0422CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift */,
-				8B5C641022E95B290087DE19 /* OAuthProviderStub.swift */,
-			);
-			path = OAuth;
-			sourceTree = "<group>";
-		};
 		8B710C0622CD89F800CF5D75 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -193,12 +187,14 @@
 			path = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		8BF414CA230E418F002BBE9A /* Harvest */ = {
+		8BF414CA230E418F002BBE9A /* Harvester */ = {
 			isa = PBXGroup;
 			children = (
-				8BF414CB230E41AB002BBE9A /* Harvest.swift */,
+				8B792613239711BC0068B559 /* Formatters.swift */,
+				8BF414CB230E41AB002BBE9A /* Harvester.swift */,
+				8B59FF2F23712B9F0010ADAB /* HarvesterState.swift */,
 			);
-			path = Harvest;
+			path = Harvester;
 			sourceTree = "<group>";
 		};
 		8BFA40BA22E18D4A008B8BB6 /* Views */ = {
@@ -207,12 +203,15 @@
 				8B46105322D9B0A700BB4D28 /* AccountsView.swift */,
 				8B46105522D9B7BF00BB4D28 /* AccountView.swift */,
 				8B60C5BB23209126009030A6 /* CompanyView.swift */,
-				8B710BC922CD77FB00CF5D75 /* MainView.swift */,
+				8BCCE4FD236B7A9E0085C97D /* EditTimeEntryView.swift */,
 				8B57D08C233F10AF008EAB43 /* ExploreView.swift */,
+				8B710BC922CD77FB00CF5D75 /* MainView.swift */,
+				8B233D10236A9B3700BE7826 /* Passthrough.swift */,
 				8B0C32E823075BB600A56D03 /* ProjectsView.swift */,
 				8B593B8F2354083C005C3A26 /* SelectAccountView.swift */,
 				8B0C32EA23075E3600A56D03 /* TasksView.swift */,
 				8B60C5B923208A11009030A6 /* TimeEntriesView.swift */,
+				8B79261123970E250068B559 /* TimeEntryView.swift */,
 				8B65421622E16CA9004E3665 /* UserView.swift */,
 			);
 			path = Views;
@@ -236,7 +235,6 @@
 			name = HarvesterExample;
 			packageProductDependencies = (
 				8B710BF622CD78D300CF5D75 /* Harvester */,
-				8B710C0722CD8D5500CF5D75 /* OAuthSwift */,
 			);
 			productName = HarvesterExample;
 			productReference = 8B710BC222CD77FB00CF5D75 /* HarvesterExample.app */;
@@ -311,7 +309,6 @@
 			);
 			mainGroup = 8B710BB922CD77FB00CF5D75;
 			packageReferences = (
-				8B710BF922CD7E3F00CF5D75 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
 			);
 			productRefGroup = 8B710BC322CD77FB00CF5D75 /* Products */;
 			projectDirPath = "";
@@ -359,14 +356,17 @@
 				8B57D08D233F10AF008EAB43 /* ExploreView.swift in Sources */,
 				8B60C5BA23208A11009030A6 /* TimeEntriesView.swift in Sources */,
 				8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */,
-				8BF414CC230E41AB002BBE9A /* Harvest.swift in Sources */,
+				8BF414CC230E41AB002BBE9A /* Harvester.swift in Sources */,
+				8B233D11236A9B3700BE7826 /* Passthrough.swift in Sources */,
 				8B710BC622CD77FB00CF5D75 /* AppDelegate.swift in Sources */,
-				8B710C0522CD89CA00CF5D75 /* OAuthSwiftOAuthProvider.swift in Sources */,
+				8B79261223970E250068B559 /* TimeEntryView.swift in Sources */,
 				8B710BC822CD77FB00CF5D75 /* SceneDelegate.swift in Sources */,
-				8B5C641122E95B290087DE19 /* OAuthProviderStub.swift in Sources */,
+				8BCCE4FE236B7A9E0085C97D /* EditTimeEntryView.swift in Sources */,
 				8B46105622D9B7BF00BB4D28 /* AccountView.swift in Sources */,
 				8B0C32E923075BB600A56D03 /* ProjectsView.swift in Sources */,
+				8B792614239711BC0068B559 /* Formatters.swift in Sources */,
 				8B710BCA22CD77FB00CF5D75 /* MainView.swift in Sources */,
+				8B59FF3023712B9F0010ADAB /* HarvesterState.swift in Sources */,
 				8B60C5BC23209126009030A6 /* CompanyView.swift in Sources */,
 				8B65421722E16CA9004E3665 /* UserView.swift in Sources */,
 				8B593B902354083C005C3A26 /* SelectAccountView.swift in Sources */,
@@ -696,26 +696,10 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		8B710BF922CD7E3F00CF5D75 /* XCRemoteSwiftPackageReference "OAuthSwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/OAuthSwift/OAuthSwift.git";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
 		8B710BF622CD78D300CF5D75 /* Harvester */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Harvester;
-		};
-		8B710C0722CD8D5500CF5D75 /* OAuthSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8B710BF922CD7E3F00CF5D75 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
-			productName = OAuthSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

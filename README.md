@@ -14,9 +14,11 @@ Harvester is distributed as a [Swift package](https://developer.apple.com/docume
 
 ### Authentication
 
-[Authentication](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/) is done using the [OAuth 2 standard](https://tools.ietf.org/html/rfc6749). The Harvester library uses the [Authorization Code flow](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/#oauth2-authorization-flow) option. The Harvester example project uses the [OAuthSwift](https://github.com/OAuthSwift/OAuthSwift) library, but you may choose to use another library or write your own implementation. The only requirement is that your OAuth library must conform to the [OAuthProvider](Sources/Harvester/OAuthProvider.swift) protocol.
+[Authentication](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/) is done using either the [OAuth 2 standard](https://tools.ietf.org/html/rfc6749) or a Personal Access Token. Requests to the Harvest API must include an access token from one of these sources. The Harvester example project uses the Personal Access Token scheme, but you may choose to use an OAuth library or write your own implementation. The only requirement is that your implementation must conform to the [AuthorizationProvider](Sources/Harvester/Authorization/AuthorizationProvider.swift) protocol which supports authorization, deauthorization, and provides an access token.
 
-Any app which wishes to use the Harvest API must first be [registered](https://id.getharvest.com/developers) with Harvest (requires a Harvest account).
+#### OAuth
+
+Any app which wishes to use OAuth with the Harvest API must first be [registered](https://id.getharvest.com/developers) with Harvest (requires a Harvest account).
 1. Once logged in, chose [Create New OAuth2 Application](https://id.getharvest.com/oauth2/clients/new).
 2. Fill in the app **Name**.
 3. Fill in the **Redirect URL**.
@@ -26,13 +28,17 @@ Any app which wishes to use the Harvest API must first be [registered](https://i
 6. Choose **Create Application**.
 7. Use the **Client ID** and **Client Secret** values generated on this page with your OAuth library or custom implementation.
 
-### OAuthProvider
+#### Personal Access Token
 
-In order for Harvester to make authorized requests to the Harvest API, it must have the proper OAuth credentials. These are provided by the [OAuthProvider protocol](Sources/Harvester/OAuthProvider.swift). This protocol provides essential functions needed to interact with your chosen OAuth library or custom implementation. It allows Harvester to check authorization status, authorize and deauthorize the app, and make generic authorized network requests. The example app contains an [implementation](Example/HarvesterExample/HarvesterExample/OAuth/OAuthSwiftOAuthProvider.swift) for the OAuthSwift library.
+Personal access tokens can be generated on the [Harvest developers web page](https://id.getharvest.com/developers). (requires a Harvest account).
+1. Once logged in, chose [Create New Personal Access Token](https://id.getharvest.com/oauth2/access_tokens/new).
+2. Fill in the access token **Name**.
+3. Choose **Create Personal Access Token**.
+7. Use the **Your Token** value generated on this page to authorize all requests to the Harvest API. This will only work for requests to your own account.
 
 ### Configuration
 
 [HarvestAPI](Sources/Harvester/HarvestAPI.swift) is the main point of contact with the Harvester library. It is initialized with a [HarvestAPIConfiguration](Sources/Harvester/HarvestAPIConfiguration.swift) containing the following properties:
 1. **appName** - The name of your app. This is sent to Harvest as part of a user agent string. It is used to identify which app a request came from.
 2. **contactEmail** - The email address which Harvest should use to contact you with questions or comments. This is sent to Harvest as part of a user agent string.
-3. **oauthProvider** - Your OAuthProvider implementation (see OAuthProvider section above).
+3. **authorizationProvider** - Your AuthorizationProvider implementation (see Authentication section above).

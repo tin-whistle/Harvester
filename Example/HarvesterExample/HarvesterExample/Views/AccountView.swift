@@ -1,21 +1,21 @@
 import Harvester
 import SwiftUI
 
-struct AccountView<T: Harvest> : View {
+struct AccountView : View {
     let account: HarvestAccount
-    @EnvironmentObject var harvest: T
+    @EnvironmentObject var harvest: HarvestState
     var body: some View {
         List {
-            NavigationLink(destination: UserView<T>()) {
+            NavigationLink(destination: UserView()) {
                 Text("Get User")
             }
-            NavigationLink(destination: ProjectsView<T>()) {
+            NavigationLink(destination: ProjectsView()) {
                 Text("Get Projects")
             }
-            NavigationLink(destination: TimeEntriesView<T>()) {
+            NavigationLink(destination: TimeEntriesView()) {
                 Text("Get Time Entries")
             }
-            NavigationLink(destination: CompanyView<T>()) {
+            NavigationLink(destination: CompanyView()) {
                 Text("Get Company")
             }
         }
@@ -29,8 +29,8 @@ struct AccountView<T: Harvest> : View {
 #if DEBUG
 struct AccountView_Previews : PreviewProvider {
     static var previews: some View {
-        let view = AccountView<PreviewHarvest>(account: HarvestAccount(id: 0, name: "My Account", product: .harvest))
-            .environmentObject(PreviewHarvest())
+        let view = AccountView(account: HarvestAccount(id: 0, name: "My Account", product: .harvest))
+            .environmentObject(HarvestState(api: PreviewHarvester()))
         return view
     }
 }

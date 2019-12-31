@@ -1,7 +1,6 @@
 import UIKit
 import SwiftUI
 import Harvester
-import OAuthSwift
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -17,14 +16,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let window = UIWindow(windowScene: windowScene)
 
             guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-                  let harvest = appDelegate.harvest,
-                  let oauthProvider = appDelegate.oauthProvider else {
+                  let harvest = appDelegate.harvest else {
                 fatalError("Failed to find HarvestAPI.")
             }
 
-            // Create the main view and give the app delegate's oauth provider a reference to its view controller.
-            let hostingController = UIHostingController(rootView: MainView<HarvestAPI>().environmentObject(harvest))
-            oauthProvider.authorizationParentViewController = hostingController
+            // Create the main view and give the app delegate's authorization provider a reference to its view controller.
+            let hostingController = UIHostingController(rootView: MainView()
+                .environmentObject(HarvestState(api: harvest)))
+            appDelegate.authorizationProvider.authorizationParentViewController = hostingController
             window.rootViewController = hostingController
             self.window = window
             window.makeKeyAndVisible()
@@ -57,15 +56,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
-    }
-
-    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-        guard userActivity.activityType == NSUserActivityTypeBrowsingWeb, let url = userActivity.webpageURL else {
-            print("Received unknown user activity: \(userActivity)")
-            return
-        }
-
-        OAuthSwift.handle(url: url)
     }
 }
 

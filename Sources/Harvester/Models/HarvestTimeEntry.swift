@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestTimeEntry: Decodable {
+public struct HarvestTimeEntry: Decodable, Identifiable {
     public let id: Int
     public let spentDate: String
     public let client: HarvestClient
@@ -27,5 +27,27 @@ public struct HarvestTimeEntry: Decodable {
         case startedTime = "started_time"
         case endedTime = "ended_time"
         case isRunning = "is_running"
+    }
+
+    public init(id: Int,
+                spentDate: String,
+                client: HarvestClient,
+                project: HarvestProject,
+                task: HarvestTask,
+                hours: Double,
+                notes: String?,
+                startedTime: String?,
+                endedTime: String?,
+                isRunning: Bool) {
+        self.id = id
+        self.spentDate = spentDate
+        self.client = client
+        self.project = project
+        self.task = task
+        self.hours = hours
+        self.notes = notes
+        self.startedTime = startedTime
+        self.endedTime = endedTime
+        self.isRunning = isRunning
     }
 }

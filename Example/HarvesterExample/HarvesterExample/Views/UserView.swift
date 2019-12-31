@@ -3,36 +3,23 @@ import Foundation
 import Harvester
 import SwiftUI
 
-struct UserView<T: Harvest>: View {
-    @EnvironmentObject var harvest: T
-    @State var user: HarvestUser? = nil
-    @State var image = UIImage()
-    
+struct UserView: View {
+    @EnvironmentObject var harvest: HarvestState
+
     private var userName: String {
         var components = PersonNameComponents()
-        components.givenName = user?.firstName
-        components.familyName = user?.lastName
+        components.givenName = harvest.user?.firstName
+        components.familyName = harvest.user?.lastName
         return PersonNameComponentsFormatter().string(from: components)
     }
     
     var body: some View {
         VStack {
-            Image(uiImage: image).mask(Circle())
+            Image(uiImage: harvest.userImage ?? UIImage()).mask(Circle())
             Text("\(userName)")
         }
         .onAppear {
-            self.harvest.getMe { result in
-                switch result {
-                case let .success(user):
-                    self.user = user
-                    URLSession.shared.dataTask(with: user.avatarURL) { data, response, error in
-                        guard let data = data, let image = UIImage(data: data) else { return }
-                        self.image = image
-                    }.resume()
-                case .failure:
-                    break
-                }
-            }
+            self.harvest.loadUser()
         }
         .navigationBarTitle("User")
         .animation(.spring())
@@ -42,8 +29,8 @@ struct UserView<T: Harvest>: View {
 #if DEBUG
 struct UserView_Previews: PreviewProvider {
     static var previews: some View {
-        UserView<PreviewHarvest>()
-            .environmentObject(PreviewHarvest())
+        UserView()
+            .environmentObject(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

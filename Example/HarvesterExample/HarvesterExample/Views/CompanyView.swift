@@ -1,23 +1,15 @@
 import Harvester
 import SwiftUI
 
-struct CompanyView<T: Harvest>: View {
-    @EnvironmentObject var harvest: T
-    @State var company: HarvestCompany? = nil
+struct CompanyView: View {
+    @EnvironmentObject var harvest: HarvestState
     
     var body: some View {
         VStack {
-            Text("\(company?.name ?? "")")
+            Text("\(harvest.company?.name ?? "")")
         }
         .onAppear {
-            self.harvest.getCompany { result in
-                switch result {
-                case let .success(company):
-                    self.company = company
-                case .failure:
-                    break
-                }
-            }
+            self.harvest.loadCompany()
         }
         .navigationBarTitle("Company")
         .animation(.spring())
@@ -27,8 +19,8 @@ struct CompanyView<T: Harvest>: View {
 #if DEBUG
 struct CompanyView_Previews: PreviewProvider {
     static var previews: some View {
-        CompanyView<PreviewHarvest>()
-            .environmentObject(PreviewHarvest())
+        CompanyView()
+            .environmentObject(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

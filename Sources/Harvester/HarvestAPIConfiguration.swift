@@ -1,11 +1,11 @@
 public struct HarvestAPIConfiguration {
     let appName: String
+    let authorizationProvider: AuthorizationProvider
     let contactEmail: String
-    let oauthProvider: OAuthProvider
-    
-    public init(appName: String, contactEmail: String, oauthProvider: OAuthProvider) {
+
+    public init(appName: String, authorizationProvider: AuthorizationProvider, contactEmail: String) {
         self.appName = appName
+        self.authorizationProvider = authorizationProvider
         self.contactEmail = contactEmail
-        self.oauthProvider = oauthProvider
     }
 }
