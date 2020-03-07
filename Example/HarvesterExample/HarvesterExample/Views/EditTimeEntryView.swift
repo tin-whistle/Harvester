@@ -185,12 +185,13 @@ struct EditTimeEntryView : View {
                                                     isRunning: originalTimeEntry.isRunning)
             harvest.updateTimeEntry(updatedTimeEntry)
         } else {
-            guard let project = project, let task = task else { return }
-            harvest.startTimeEntryWith(hours: hours,
+            guard let client = client, let project = project, let task = task else { return }
+            harvest.startTimeEntryWith(client: client,
+                                       hours: hours,
                                        notes: notes,
-                                       projectId: project.id,
+                                       project: project,
                                        spentDate: Date(),
-                                       taskId: task.id)
+                                       task: task)
         }
         show = false
     }

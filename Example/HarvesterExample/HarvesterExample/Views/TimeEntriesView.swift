@@ -9,6 +9,34 @@ struct TimeEntriesView : View {
 
     var body: some View {
         List {
+            if harvest.timeEntries.count > 0 {
+                Section(header: HStack {
+                    Text("Totals")
+                        .font(.headline)
+                    Spacer()
+                }) {
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("\(self.harvest.timeEntryTotalHoursInLastSevenDays.formattedHours())")
+                                .font(.headline)
+                            Text("Last 7 Days")
+                                .font(.caption)
+                                .lineLimit(20)
+                                .multilineTextAlignment(.leading)
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .trailing) {
+                            Text("\(self.harvest.timeEntryTotalHoursThisWeek.formattedHours())")
+                                .font(.headline)
+                            Text("This Week")
+                                .font(.caption)
+                                .lineLimit(20)
+                                .multilineTextAlignment(.trailing)
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .trailing)
+                    }
+                }
+            }
             ForEach(harvest.timeEntryDates, id: \.timeIntervalSinceReferenceDate) { date in
                 Section(header: HStack {
                     Text("\(DateFormatter.harvestDateFormatter.string(from: date))")
@@ -43,11 +71,12 @@ struct TimeEntriesView : View {
             if timeEntry.isRunning {
                 self.harvest.stopTimeEntry(timeEntry)
             } else {
-                self.harvest.startTimeEntryWith(hours: 0,
+                self.harvest.startTimeEntryWith(client: timeEntry.client,
+                                                hours: 0,
                                                 notes: timeEntry.notes,
-                                                projectId: timeEntry.project.id,
+                                                project: timeEntry.project,
                                                 spentDate: Date(),
-                                                taskId: timeEntry.task.id)
+                                                task: timeEntry.task)
             }
         }) {
             if timeEntry.isRunning {

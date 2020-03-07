@@ -60,11 +60,12 @@ struct TimeEntryView: View {
             if timeEntry.isRunning {
                 self.harvest.stopTimeEntry(timeEntry)
             } else {
-                self.harvest.startTimeEntryWith(hours: 0,
+                self.harvest.startTimeEntryWith(client: timeEntry.client,
+                                                hours: 0,
                                                 notes: timeEntry.notes,
-                                                projectId: timeEntry.project.id,
+                                                project: timeEntry.project,
                                                 spentDate: Date(),
-                                                taskId: timeEntry.task.id)
+                                                task: timeEntry.task)
             }
         }) {
             if timeEntry.isRunning {
