@@ -216,7 +216,7 @@ class HarvestState: ObservableObject {
             }
         }
         // Perform a quick local start.
-        let timeEntry = HarvestTimeEntry(id: Int.random(in: 1000...10000),
+        let timeEntry = HarvestTimeEntry(id: -Int.random(in: 1000...10000),
                                          spentDate: DateFormatter.yyyyMMdd.string(from: spentDate),
                                          client: client,
                                          project: project,

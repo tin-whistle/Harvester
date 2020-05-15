@@ -13,6 +13,7 @@ public struct HarvestTimeEntry: Decodable, Identifiable {
     public let startedTime: String?
     public let endedTime: String?
     public let isRunning: Bool
+    public private(set) var isDirty: Bool = false
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
@@ -49,5 +50,6 @@ public struct HarvestTimeEntry: Decodable, Identifiable {
         self.startedTime = startedTime
         self.endedTime = endedTime
         self.isRunning = isRunning
+        isDirty = true
     }
 }

@@ -10,9 +10,11 @@ struct TimeEntryView: View {
 
     var body: some View {
         ZStack {
-            self.primaryActionButtonForTimeEntry(timeEntry)
-                .hidden()
-            HStack(alignment: .top) {
+            if !timeEntry.isDirty {
+                self.primaryActionButtonForTimeEntry(timeEntry)
+                    .hidden()
+            }
+            HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading) {
                     Text(timeEntry.notes ?? "")
                         .font(.body)
@@ -24,25 +26,31 @@ struct TimeEntryView: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
+                if timeEntry.isDirty {
+                    Image(systemName: "arrow.2.circlepath")
+                        .foregroundColor(.red)
+                }
                 Text("\(timeEntry.hours.formattedHours())")
                     .font(.body)
                     .bold()
                     .foregroundColor(timeEntry.isRunning ? .blue : .primary)
             }
             .contextMenu {
-                self.primaryActionButtonForTimeEntry(timeEntry)
-                Button(action: {
-                    self.showEditModal = true
-                }) {
-                    Image(systemName: "pencil")
-                    Text("Edit")
+                if !timeEntry.isDirty {
+                    self.primaryActionButtonForTimeEntry(timeEntry)
+                    Button(action: {
+                        self.showEditModal = true
+                    }) {
+                        Image(systemName: "pencil")
+                        Text("Edit")
+                    }
+                    Button(action: {
+                        self.harvest.deleteTimeEntry(self.timeEntry)
+                    }) {
+                        Image(systemName: "trash")
+                        Text("Delete")
+                    }.foregroundColor(.red)
                 }
-                Button(action: {
-                    self.harvest.deleteTimeEntry(self.timeEntry)
-                }) {
-                    Image(systemName: "trash")
-                    Text("Delete")
-                }.foregroundColor(.red)
             }
         }
         .sheet(isPresented: self.$showEditModal, onDismiss: {
