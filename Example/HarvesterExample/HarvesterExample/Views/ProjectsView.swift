@@ -13,7 +13,7 @@ struct ProjectsView: View {
             }
         }.task {
             await harvest.loadProjectAssignments()
-        }.navigationBarTitle("Projects")
+        }.navigationTitle("Projects")
     }
 }
 

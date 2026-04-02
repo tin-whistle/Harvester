@@ -71,7 +71,7 @@ struct TimeEntriesView : View {
                 await harvest.loadTimeEntries()
             }
         }
-        .navigationBarTitle("Time Entries")
+        .navigationTitle("Time Entries")
     }
 
     private func primaryActionButtonForTimeEntry(_ timeEntry: HarvestTimeEntry) -> some View {

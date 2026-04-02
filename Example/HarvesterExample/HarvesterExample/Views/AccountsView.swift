@@ -13,7 +13,7 @@ struct AccountsView : View {
             }
         }.task {
             await harvest.loadAccounts()
-        }.navigationBarTitle("Accounts")
+        }.navigationTitle("Accounts")
     }
 }
 

@@ -9,7 +9,7 @@ struct TasksView: View {
             ForEach(projectAssignment?.taskAssignments ?? [], id: \.id) { taskAssignment in
                 Text("\(taskAssignment.task.name)")
             }
-        }.navigationBarTitle("Tasks")
+        }.navigationTitle("Tasks")
     }
 }
 

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		8B0C32E923075BB600A56D03 /* ProjectsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0C32E823075BB600A56D03 /* ProjectsView.swift */; };
 		8B0C32EB23075E3600A56D03 /* TasksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0C32EA23075E3600A56D03 /* TasksView.swift */; };
-		8B233D11236A9B3700BE7826 /* Passthrough.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B233D10236A9B3700BE7826 /* Passthrough.swift */; };
 		8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105322D9B0A700BB4D28 /* AccountsView.swift */; };
 		8B46105622D9B7BF00BB4D28 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B46105522D9B7BF00BB4D28 /* AccountView.swift */; };
 		8B57D08D233F10AF008EAB43 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B57D08C233F10AF008EAB43 /* ExploreView.swift */; };
@@ -53,7 +52,6 @@
 /* Begin PBXFileReference section */
 		8B0C32E823075BB600A56D03 /* ProjectsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectsView.swift; sourceTree = "<group>"; };
 		8B0C32EA23075E3600A56D03 /* TasksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksView.swift; sourceTree = "<group>"; };
-		8B233D10236A9B3700BE7826 /* Passthrough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Passthrough.swift; sourceTree = "<group>"; };
 		8B46105322D9B0A700BB4D28 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		8B46105522D9B7BF00BB4D28 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		8B57D08C233F10AF008EAB43 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
@@ -206,7 +204,6 @@
 				8BCCE4FD236B7A9E0085C97D /* EditTimeEntryView.swift */,
 				8B57D08C233F10AF008EAB43 /* ExploreView.swift */,
 				8B710BC922CD77FB00CF5D75 /* MainView.swift */,
-				8B233D10236A9B3700BE7826 /* Passthrough.swift */,
 				8B0C32E823075BB600A56D03 /* ProjectsView.swift */,
 				8B593B8F2354083C005C3A26 /* SelectAccountView.swift */,
 				8B0C32EA23075E3600A56D03 /* TasksView.swift */,
@@ -358,7 +355,6 @@
 				8B60C5BA23208A11009030A6 /* TimeEntriesView.swift in Sources */,
 				8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */,
 				8BF414CC230E41AB002BBE9A /* Harvester.swift in Sources */,
-				8B233D11236A9B3700BE7826 /* Passthrough.swift in Sources */,
 				8B710BC622CD77FB00CF5D75 /* AppDelegate.swift in Sources */,
 				8B79261223970E250068B559 /* TimeEntryView.swift in Sources */,
 				8B710BC822CD77FB00CF5D75 /* SceneDelegate.swift in Sources */,

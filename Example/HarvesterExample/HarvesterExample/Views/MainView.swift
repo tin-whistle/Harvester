@@ -52,8 +52,8 @@ struct MainView : View {
     }
 
     var body: some View {
-        NavigationView {
-            Passthrough {
+        NavigationStack {
+            Group {
                 if self.harvest.currentAccountId == nil {
                     List {
                         Text("No Account Selected")
@@ -62,8 +62,17 @@ struct MainView : View {
                     TimeEntriesView()
                 }
             }
-            .navigationBarTitle("Harvester")
-            .navigationBarItems(leading: harvest.isAuthorized ? addButton : nil, trailing: setupButton)
+            .navigationTitle("Harvester")
+            .toolbar {
+                if harvest.isAuthorized {
+                    ToolbarItem(placement: .topBarLeading) {
+                        addButton
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    setupButton
+                }
+            }
         }
         .actionSheet(isPresented: self.$showSheet) {
             ActionSheet(title: Text("Setup"), message: nil, buttons: self.actionSheetButtons)
@@ -72,16 +81,16 @@ struct MainView : View {
             Task { await self.harvest.loadTimeEntries() }
         }) {
             if self.modalSelection == .addTimeEntry {
-                NavigationView {
+                NavigationStack {
                     EditTimeEntryView(show: self.$showModal, originalTimeEntry: nil)
                         .environment(self.harvest)
                 }
             } else if self.modalSelection == .explore {
-                NavigationView {
+                NavigationStack {
                     ExploreView().environment(self.harvest)
                 }
             } else {
-                NavigationView {
+                NavigationStack {
                     SelectAccountView(show: self.$showModal).environment(self.harvest)
                 }
             }

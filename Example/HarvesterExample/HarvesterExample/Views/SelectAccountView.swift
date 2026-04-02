@@ -20,7 +20,7 @@ struct SelectAccountView : View {
         .task {
             await self.harvest.loadAccounts()
         }
-        .navigationBarTitle("Select Account")
+        .navigationTitle("Select Account")
     }
 }
 

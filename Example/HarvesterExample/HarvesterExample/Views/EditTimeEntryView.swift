@@ -167,8 +167,15 @@ struct EditTimeEntryView : View {
                 selectClient()
             }
         }
-        .navigationBarTitle(originalTimeEntry == nil ? "Add Time Entry" : "Edit Time Entry")
-        .navigationBarItems(leading: cancelButton, trailing: saveButton)
+        .navigationTitle(originalTimeEntry == nil ? "Add Time Entry" : "Edit Time Entry")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                cancelButton
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                saveButton
+            }
+        }
     }
 
     private func save() {

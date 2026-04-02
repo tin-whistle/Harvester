@@ -12,7 +12,7 @@ struct ExploreView : View {
                 }
             }
         }
-        .navigationBarTitle("Explore API")
+        .navigationTitle("Explore API")
     }
 }
 

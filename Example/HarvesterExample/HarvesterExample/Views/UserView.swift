@@ -20,7 +20,7 @@ struct UserView: View {
         .task {
             await harvest.loadUser()
         }
-        .navigationBarTitle("User")
+        .navigationTitle("User")
     }
 }
 

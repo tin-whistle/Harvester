@@ -19,7 +19,7 @@ struct AccountView : View {
                 Text("Get Company")
             }
         }
-        .navigationBarTitle(account.name)
+        .navigationTitle(account.name)
         .onAppear {
             self.harvest.currentAccountId = self.account.id
         }

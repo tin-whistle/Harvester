@@ -11,7 +11,7 @@ struct CompanyView: View {
         .task {
             await harvest.loadCompany()
         }
-        .navigationBarTitle("Company")
+        .navigationTitle("Company")
     }
 }
 
