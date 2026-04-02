@@ -3,7 +3,7 @@ import Harvester
 import SwiftUI
 
 struct UserView: View {
-    @EnvironmentObject var harvest: HarvestState
+    @Environment(HarvestState.self) var harvest
 
     private var userName: String {
         var components = PersonNameComponents()
@@ -28,7 +28,7 @@ struct UserView: View {
 struct UserView_Previews: PreviewProvider {
     static var previews: some View {
         UserView()
-            .environmentObject(HarvestState(api: PreviewHarvester()))
+            .environment(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

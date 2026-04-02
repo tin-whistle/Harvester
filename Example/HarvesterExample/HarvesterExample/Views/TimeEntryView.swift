@@ -3,20 +3,25 @@ import SwiftUI
 
 struct TimeEntryView: View {
 
+    @Environment(HarvestState.self) var harvest
     @State private var showEditModal = false
 
-    @StateObject var model: TimeEntryModel
+    let timeEntryId: Int
+
+    private var timeEntry: HarvestTimeEntry? {
+        harvest.timeEntryById(timeEntryId)
+    }
 
     var body: some View {
-        if let timeEntry = model.timeEntry {
+        if let timeEntry {
             ZStack {
                 Menu {
                     if !timeEntry.isDirty {
                         Button(action: {
                             if timeEntry.isRunning {
-                                model.harvest.stopTimeEntry(timeEntry)
+                                harvest.stopTimeEntry(timeEntry)
                             } else {
-                                model.harvest.startTimeEntryWith(client: timeEntry.client,
+                                harvest.startTimeEntryWith(client: timeEntry.client,
                                                                  hours: 0,
                                                                  notes: timeEntry.notes,
                                                                  project: timeEntry.project,
@@ -39,7 +44,7 @@ struct TimeEntryView: View {
                             Text("Edit")
                         }
                         Button(action: {
-                            model.harvest.deleteTimeEntry(timeEntry)
+                            harvest.deleteTimeEntry(timeEntry)
                         }) {
                             Image(systemName: "trash")
                             Text("Delete")
@@ -71,11 +76,11 @@ struct TimeEntryView: View {
                 }
             }
             .sheet(isPresented: $showEditModal, onDismiss: {
-                Task { await model.harvest.loadTimeEntries() }
+                Task { await harvest.loadTimeEntries() }
             }) {
                 NavigationView {
-                    EditTimeEntryView(show: $showEditModal, originalTimeEntry: model.timeEntry)
-                        .environmentObject(model.harvest)
+                    EditTimeEntryView(show: $showEditModal, originalTimeEntry: timeEntry)
+                        .environment(harvest)
                 }
             }
         }
@@ -98,8 +103,7 @@ struct TimeEntryView_Previews: PreviewProvider {
                                                            endedTime: nil,
                                                            isRunning: true)
     static var previews: some View {
-        TimeEntryView(
-            model: TimeEntryModel(harvest: HarvestState(api: PreviewHarvester()), timeEntryId: 0)
-        )
+        TimeEntryView(timeEntryId: 0)
+            .environment(HarvestState(api: PreviewHarvester()))
     }
 }

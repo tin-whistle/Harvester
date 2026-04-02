@@ -2,7 +2,7 @@ import Harvester
 import SwiftUI
 
 struct TimeEntriesView : View {
-    @EnvironmentObject var harvest: HarvestState
+    @Environment(HarvestState.self) var harvest
 
     var body: some View {
         List {
@@ -52,7 +52,7 @@ struct TimeEntriesView : View {
                         .font(.headline)
                 }) {
                     ForEach(harvest.timeEntriesByDate[date] ?? [], id: \.id) { timeEntry in
-                        TimeEntryView(model: TimeEntryModel(harvest: harvest, timeEntryId: timeEntry.id))
+                        TimeEntryView(timeEntryId: timeEntry.id)
                     }
                     .onDelete { indexSet in
                         guard let firstValidIndex = indexSet.first(where: { $0 < harvest.timeEntries.count }) else { return }
@@ -102,7 +102,7 @@ struct TimeEntriesView : View {
 struct TimeEntriesView_Previews : PreviewProvider {
     static var previews: some View {
         TimeEntriesView()
-            .environmentObject(HarvestState(api: PreviewHarvester()))
+            .environment(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

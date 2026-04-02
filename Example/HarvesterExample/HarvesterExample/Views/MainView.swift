@@ -2,7 +2,7 @@ import SwiftUI
 import Harvester
 
 struct MainView : View {
-    @EnvironmentObject var harvest: HarvestState
+    @Environment(HarvestState.self) var harvest
     
     @State private var modalSelection = ModalSelection.explore
     @State private var showModal = false
@@ -74,15 +74,15 @@ struct MainView : View {
             if self.modalSelection == .addTimeEntry {
                 NavigationView {
                     EditTimeEntryView(show: self.$showModal, originalTimeEntry: nil)
-                        .environmentObject(self.harvest)
+                        .environment(self.harvest)
                 }
             } else if self.modalSelection == .explore {
                 NavigationView {
-                    ExploreView().environmentObject(self.harvest)
+                    ExploreView().environment(self.harvest)
                 }
             } else {
                 NavigationView {
-                    SelectAccountView(show: self.$showModal).environmentObject(self.harvest)
+                    SelectAccountView(show: self.$showModal).environment(self.harvest)
                 }
             }
         }
@@ -101,7 +101,7 @@ enum ModalSelection {
 struct MainView_Previews : PreviewProvider {
     static var previews: some View {
         MainView()
-            .environmentObject(HarvestState(api: PreviewHarvester()))
+            .environment(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

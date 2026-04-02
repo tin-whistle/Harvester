@@ -3,7 +3,7 @@ import SwiftUI
 
 struct AccountView : View {
     let account: HarvestAccount
-    @EnvironmentObject var harvest: HarvestState
+    @Environment(HarvestState.self) var harvest
     var body: some View {
         List {
             NavigationLink(destination: UserView()) {
@@ -30,7 +30,7 @@ struct AccountView : View {
 struct AccountView_Previews : PreviewProvider {
     static var previews: some View {
         let view = AccountView(account: HarvestAccount(id: 0, name: "My Account", product: .harvest))
-            .environmentObject(HarvestState(api: PreviewHarvester()))
+            .environment(HarvestState(api: PreviewHarvester()))
         return view
     }
 }

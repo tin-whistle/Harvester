@@ -1,8 +1,6 @@
-import UIKit
-import SwiftUI
-import Combine
+import Foundation
 
-public class HarvestAPI: ObservableObject {
+public class HarvestAPI {
 
     private var localStorage: LocalStorage
     private var networkClient: AuthorizedNetworkClient
@@ -10,22 +8,15 @@ public class HarvestAPI: ObservableObject {
     // MARK: Authorization
     
     public var currentAccountId: Int? {
-        get {
-            localStorage.accountId
-        }
-        set {
-            objectWillChange.send()
-            networkClient.accountId = newValue
-            localStorage.accountId = newValue
+        didSet {
+            networkClient.accountId = currentAccountId
+            localStorage.accountId = currentAccountId
         }
     }
 
     public private(set) var wantsTimestampTimers: Bool? {
-        get {
-            localStorage.wantsTimestampTimers
-        }
-        set {
-            localStorage.wantsTimestampTimers = newValue
+        didSet {
+            localStorage.wantsTimestampTimers = wantsTimestampTimers
         }
     }
     
@@ -44,12 +35,10 @@ public class HarvestAPI: ObservableObject {
                 }
             }
         }
-        objectWillChange.send()
         return authorized
     }
     
     public func deauthorize() throws {
-        objectWillChange.send()
         try networkClient.deauthorize()
         currentAccountId = nil
         wantsTimestampTimers = nil
@@ -112,10 +101,8 @@ public class HarvestAPI: ObservableObject {
                 localStorage: LocalStorage = DefaultLocalStorage()) {
         self.localStorage = localStorage
         self.networkClient = HarvestNetworkClient(configuration: configuration)
+        self.currentAccountId = localStorage.accountId
+        self.wantsTimestampTimers = localStorage.wantsTimestampTimers
         self.networkClient.accountId = currentAccountId
-
     }
-    
-    // MARK: ObservableObject
-    public var objectWillChange = PassthroughSubject<Void, Never>()
 }

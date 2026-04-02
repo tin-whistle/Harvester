@@ -21,8 +21,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
 
             // Create the main view and give the app delegate's authorization provider a reference to its view controller.
+            let harvestState = HarvestState(api: harvest)
             let hostingController = UIHostingController(rootView: MainView()
-                .environmentObject(HarvestState(api: harvest)))
+                .environment(harvestState))
             appDelegate.authorizationProvider.authorizationParentViewController = hostingController
             window.rootViewController = hostingController
             self.window = window

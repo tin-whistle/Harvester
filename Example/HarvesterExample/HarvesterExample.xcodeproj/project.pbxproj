@@ -29,7 +29,6 @@
 		8B710BF722CD78D300CF5D75 /* Harvester in Frameworks */ = {isa = PBXBuildFile; productRef = 8B710BF622CD78D300CF5D75 /* Harvester */; };
 		8B79261223970E250068B559 /* TimeEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B79261123970E250068B559 /* TimeEntryView.swift */; };
 		8B792614239711BC0068B559 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B792613239711BC0068B559 /* Formatters.swift */; };
-		8B7BA12F27EC2D7F002C76B9 /* TimeEntryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B7BA12E27EC2D7F002C76B9 /* TimeEntryModel.swift */; };
 		8BCCE4FE236B7A9E0085C97D /* EditTimeEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BCCE4FD236B7A9E0085C97D /* EditTimeEntryView.swift */; };
 		8BF414CC230E41AB002BBE9A /* Harvester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF414CB230E41AB002BBE9A /* Harvester.swift */; };
 /* End PBXBuildFile section */
@@ -80,7 +79,6 @@
 		8B710BF822CD7DB600CF5D75 /* HarvesterExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HarvesterExample.entitlements; sourceTree = "<group>"; };
 		8B79261123970E250068B559 /* TimeEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEntryView.swift; sourceTree = "<group>"; };
 		8B792613239711BC0068B559 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
-		8B7BA12E27EC2D7F002C76B9 /* TimeEntryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeEntryModel.swift; sourceTree = "<group>"; };
 		8BCCE4FD236B7A9E0085C97D /* EditTimeEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTimeEntryView.swift; sourceTree = "<group>"; };
 		8BF414CB230E41AB002BBE9A /* Harvester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Harvester.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -213,7 +211,6 @@
 				8B593B8F2354083C005C3A26 /* SelectAccountView.swift */,
 				8B0C32EA23075E3600A56D03 /* TasksView.swift */,
 				8B60C5B923208A11009030A6 /* TimeEntriesView.swift */,
-				8B7BA12E27EC2D7F002C76B9 /* TimeEntryModel.swift */,
 				8B79261123970E250068B559 /* TimeEntryView.swift */,
 				8B65421622E16CA9004E3665 /* UserView.swift */,
 			);
@@ -357,7 +354,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B7BA12F27EC2D7F002C76B9 /* TimeEntryModel.swift in Sources */,
 				8B57D08D233F10AF008EAB43 /* ExploreView.swift in Sources */,
 				8B60C5BA23208A11009030A6 /* TimeEntriesView.swift in Sources */,
 				8B46105422D9B0A700BB4D28 /* AccountsView.swift in Sources */,

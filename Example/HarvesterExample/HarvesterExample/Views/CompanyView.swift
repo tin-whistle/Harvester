@@ -2,7 +2,7 @@ import Harvester
 import SwiftUI
 
 struct CompanyView: View {
-    @EnvironmentObject var harvest: HarvestState
+    @Environment(HarvestState.self) var harvest
     
     var body: some View {
         VStack {
@@ -19,7 +19,7 @@ struct CompanyView: View {
 struct CompanyView_Previews: PreviewProvider {
     static var previews: some View {
         CompanyView()
-            .environmentObject(HarvestState(api: PreviewHarvester()))
+            .environment(HarvestState(api: PreviewHarvester()))
     }
 }
 #endif

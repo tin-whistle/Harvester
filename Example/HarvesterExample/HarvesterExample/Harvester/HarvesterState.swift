@@ -1,28 +1,28 @@
-import Combine
 import Foundation
 import Harvester
 import UIKit
 
+@Observable
 @MainActor
-class HarvestState: ObservableObject {
+class HarvestState {
     private var api: Harvester
 
-    @Published var accounts: [HarvestAccount] = []
-    @Published var company: HarvestCompany?
-    @Published var wantsTimestampTimers: Bool?
-    @Published var currentAccountId: Int? {
+    var accounts: [HarvestAccount] = []
+    var company: HarvestCompany?
+    var wantsTimestampTimers: Bool?
+    var currentAccountId: Int? {
         didSet {
             api.currentAccountId = currentAccountId
         }
     }
-    @Published var isAuthorized = false {
+    var isAuthorized = false {
         didSet {
             currentAccountId = api.currentAccountId
             wantsTimestampTimers = api.wantsTimestampTimers
         }
     }
-    @Published var projectAssignments: [HarvestProjectAssignment] = []
-    @Published var timeEntries: [HarvestTimeEntry] = []
+    var projectAssignments: [HarvestProjectAssignment] = []
+    var timeEntries: [HarvestTimeEntry] = []
 
     var clients: [HarvestClient] {
         Set(projectAssignments.map { $0.client }).sorted { $0.name < $1.name }
@@ -121,8 +121,8 @@ class HarvestState: ObservableObject {
         return timeEntriesThisWeek.reduce(0) { $0 + $1.hours }
     }
 
-    @Published var user: HarvestUser?
-    @Published var userImage: UIImage?
+    var user: HarvestUser?
+    var userImage: UIImage?
 
     init(api: Harvester) {
         self.api = api

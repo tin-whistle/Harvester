@@ -8,7 +8,7 @@ struct EditTimeEntryView : View {
         case unmodified
     }
 
-    @EnvironmentObject var harvest: HarvestState
+    @Environment(HarvestState.self) var harvest
 
     @Binding var show: Bool
     let originalTimeEntry: HarvestTimeEntry?
@@ -265,6 +265,6 @@ struct EditTimeEntryView : View {
 struct EditTimeEntryView_Previews: PreviewProvider {
     static var previews: some View {
         EditTimeEntryView(show: .constant(true), originalTimeEntry: nil)
-            .environmentObject(HarvestState(api: PreviewHarvester()))
+            .environment(HarvestState(api: PreviewHarvester()))
     }
 }
