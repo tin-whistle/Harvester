@@ -51,7 +51,10 @@ struct MainView : View {
         }
     }
 
+    @Environment(\.openURL) private var openURL
+
     var body: some View {
+        @Bindable var harvest = harvest
         NavigationStack {
             Group {
                 if self.harvest.currentAccountId == nil {
@@ -94,6 +97,21 @@ struct MainView : View {
                     SelectAccountView(show: self.$showModal).environment(self.harvest)
                 }
             }
+        }
+        .alert("Authorization", isPresented: $harvest.showingTokenAlert) {
+            TextField("Personal Access Token", text: $harvest.tokenText)
+            Button("OK") {
+                harvest.completeAuthorization()
+            }
+            Button("Cancel", role: .cancel) {
+                harvest.cancelAuthorization()
+            }
+            Button("Open in Safari") {
+                openURL(URL(string: "https://id.getharvest.com/developers")!)
+                harvest.cancelAuthorization()
+            }
+        } message: {
+            Text("Generate a personal access token at https://id.getharvest.com/developers")
         }
     }
 

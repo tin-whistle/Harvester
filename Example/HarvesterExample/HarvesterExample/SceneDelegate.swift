@@ -20,11 +20,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 fatalError("Failed to find HarvestAPI.")
             }
 
-            // Create the main view and give the app delegate's authorization provider a reference to its view controller.
+            // Create the main view and set up the authorization handler.
             let harvestState = HarvestState(api: harvest)
+            harvestState.setupAuthorizationHandler(on: appDelegate.authorizationProvider)
             let hostingController = UIHostingController(rootView: MainView()
                 .environment(harvestState))
-            appDelegate.authorizationProvider.authorizationParentViewController = hostingController
             window.rootViewController = hostingController
             self.window = window
             window.makeKeyAndVisible()

@@ -124,9 +124,35 @@ class HarvestState {
     var user: HarvestUser?
     var userImage: UIImage?
 
+    // MARK: Authorization Alert State
+    var showingTokenAlert = false
+    var tokenText = ""
+    @ObservationIgnored private var authorizationContinuation: CheckedContinuation<String, any Error>?
+
     init(api: Harvester) {
         self.api = api
         isAuthorized = api.isAuthorized
+    }
+
+    func setupAuthorizationHandler(on provider: PersonalAccessTokenProvider) {
+        provider.tokenRequestHandler = { [weak self] in
+            guard let self else { throw AuthorizationProviderError.failed }
+            return try await withCheckedThrowingContinuation { continuation in
+                self.authorizationContinuation = continuation
+                self.tokenText = ""
+                self.showingTokenAlert = true
+            }
+        }
+    }
+
+    func completeAuthorization() {
+        authorizationContinuation?.resume(returning: tokenText)
+        authorizationContinuation = nil
+    }
+
+    func cancelAuthorization() {
+        authorizationContinuation?.resume(throwing: AuthorizationProviderError.canceled)
+        authorizationContinuation = nil
     }
 
     func authorize() async {
