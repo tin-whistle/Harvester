@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestProject: Decodable, Sendable {
+public struct HarvestProject: Decodable, Equatable, Sendable {
     public let id: Int
     public let name: String
     public let code: String

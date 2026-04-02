@@ -22,7 +22,15 @@ class HarvestState {
         }
     }
     var projectAssignments: [HarvestProjectAssignment] = []
-    var timeEntries: [HarvestTimeEntry] = []
+    var timeEntries: [HarvestTimeEntry] = [] {
+        didSet {
+            recomputeDerivedTimeEntryData()
+        }
+    }
+
+    private(set) var timeEntriesByDate: [Date: [HarvestTimeEntry]] = [:]
+    private(set) var timeEntryDates: [Date] = []
+    private(set) var timeEntryTotalHoursByDate: [Date: Double] = [:]
 
     var clients: [HarvestClient] {
         Set(projectAssignments.map { $0.client }).sorted { $0.name < $1.name }
@@ -43,22 +51,21 @@ class HarvestState {
             .sorted { $0.name < $1.name }
     }
 
-    var timeEntriesByDate: [Date: [HarvestTimeEntry]] {
+    private func recomputeDerivedTimeEntryData() {
         let formatter = DateFormatter.yyyyMMdd
-        var timeEntriesByDate: [Date: [HarvestTimeEntry]] = [:]
-
-        timeEntries.forEach {
-            guard let date = formatter.date(from: $0.spentDate) else { return }
-            var entries = timeEntriesByDate[date] ?? []
-            entries.append($0)
-            timeEntriesByDate[date] = entries
+        var byDate: [Date: [HarvestTimeEntry]] = [:]
+        for entry in timeEntries {
+            guard let date = formatter.date(from: entry.spentDate) else { continue }
+            byDate[date, default: []].append(entry)
         }
+        timeEntriesByDate = byDate
+        timeEntryDates = byDate.keys.sorted(by: >)
 
-        return timeEntriesByDate
-    }
-
-    var timeEntryDates: [Date] {
-        return timeEntriesByDate.keys.sorted(by: >)
+        var totals = [Date: Double]()
+        for (date, entries) in byDate {
+            totals[date] = entries.reduce(0) { $0 + $1.hours }
+        }
+        timeEntryTotalHoursByDate = totals
     }
 
     var timeEntryWeeklyAverage: Double {
@@ -79,14 +86,6 @@ class HarvestState {
         let totalHours = timeEntriesByDate.reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
         let numberOfWeeks = Double(daysSinceOldestEntry) / 7
         return totalHours / numberOfWeeks
-    }
-
-    var timeEntryTotalHoursByDate: [Date: Double] {
-        var totals = [Date: Double]()
-        for (date, timeEntries) in timeEntriesByDate {
-            totals[date] = timeEntries.reduce(0) { $0 + $1.hours }
-        }
-        return totals
     }
 
     var timeEntryTotalHoursInLastSevenDays: Double {
@@ -206,7 +205,10 @@ class HarvestState {
 
     func loadTimeEntries() async {
         do {
-            timeEntries = try await api.getTimeEntries()
+            let newEntries = try await api.getTimeEntries()
+            if newEntries != timeEntries {
+                timeEntries = newEntries
+            }
         } catch {
             print("Failed to load time entries: \(error)")
         }
