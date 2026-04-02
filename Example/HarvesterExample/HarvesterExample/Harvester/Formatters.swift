@@ -3,9 +3,10 @@ import Foundation
 extension DateFormatter {
     static let harvestDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "EEEE d MMM",
-                                                        options: 0,
-                                                        locale: Locale.autoupdatingCurrent)
+        formatter.dateFormat = DateFormatter.dateFormat(
+            fromTemplate: "EEEE d MMM",
+            options: 0,
+            locale: Locale.autoupdatingCurrent)
         return formatter
     }()
 }

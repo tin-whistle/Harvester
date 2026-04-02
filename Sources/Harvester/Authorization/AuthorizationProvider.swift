@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol AuthorizationProvider {
+public protocol AuthorizationProvider: Sendable {
 
     var accessToken: String? { get }
 

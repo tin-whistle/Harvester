@@ -1,6 +1,5 @@
-import XCTest
-
 import HarvesterTests
+import XCTest
 
 var tests = [XCTestCaseEntry]()
 tests += HarvesterTests.allTests()

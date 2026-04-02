@@ -6,7 +6,7 @@ struct HarvestNetworkClient: NetworkClient {
     private let userAgent: String
 
     var accountId: Int?
-    
+
     init(configuration: HarvestAPIConfiguration) {
         self.authorizationProvider = configuration.authorizationProvider
         userAgent = "\(configuration.appName) (\(configuration.contactEmail))"
@@ -19,7 +19,7 @@ extension HarvestNetworkClient: AuthorizedNetworkClient {
     var isAuthorized: Bool {
         return authorizationProvider.accessToken != nil
     }
-    
+
     func authorize() async throws -> Bool {
         do {
             return try await authorizationProvider.authorize()
@@ -27,7 +27,7 @@ extension HarvestNetworkClient: AuthorizedNetworkClient {
             throw HarvestError.authorization(error)
         }
     }
-    
+
     func deauthorize() throws {
         try authorizationProvider.deauthorize()
     }
@@ -36,34 +36,34 @@ extension HarvestNetworkClient: AuthorizedNetworkClient {
 // MARK: NetworkClient
 
 extension HarvestNetworkClient {
-    
+
     var baseURL: URL {
         return URL(string: baseURLString)!
     }
-    
+
     func send<T: NetworkRequest>(_ request: T) async throws -> T.Response {
         guard isAuthorized else {
             throw HarvestError.unauthorized
         }
-        
+
         var url = urlFrom(request)
         var bodyData: Data? = nil
         var headers = [
             "Harvest-Account-Id": "\(accountId ?? 0)",
-            "User-Agent": userAgent
+            "User-Agent": userAgent,
         ]
-        
+
         switch request.method {
         case .delete:
             break
-        case let .get(queryItems):
+        case .get(let queryItems):
             guard queryItems.count > 0 else { break }
             var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
             components?.queryItems = queryItems
             if let urlWithQuery = components?.url {
                 url = urlWithQuery
             }
-        case let .patch(body), let .post(body):
+        case .patch(let body), .post(let body):
             if let body = body {
                 do {
                     bodyData = try JSONEncoder().encode(AnyEncodable(body))

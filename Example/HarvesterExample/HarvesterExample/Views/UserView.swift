@@ -11,7 +11,7 @@ struct UserView: View {
         components.familyName = harvest.user?.lastName
         return PersonNameComponentsFormatter().string(from: components)
     }
-    
+
     var body: some View {
         VStack {
             Image(uiImage: harvest.userImage ?? UIImage()).mask(Circle())
@@ -25,10 +25,10 @@ struct UserView: View {
 }
 
 #if DEBUG
-struct UserView_Previews: PreviewProvider {
-    static var previews: some View {
-        UserView()
-            .environment(HarvestState(api: PreviewHarvester()))
+    struct UserView_Previews: PreviewProvider {
+        static var previews: some View {
+            UserView()
+                .environment(HarvestState(api: PreviewHarvester()))
+        }
     }
-}
 #endif

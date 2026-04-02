@@ -12,8 +12,10 @@ public struct HarvestClient: Decodable, Equatable, Hashable, Sendable {
         hasher.combine(id)
     }
 
-    public init(id: Int,
-                name: String) {
+    public init(
+        id: Int,
+        name: String
+    ) {
         self.id = id
         self.name = name
     }

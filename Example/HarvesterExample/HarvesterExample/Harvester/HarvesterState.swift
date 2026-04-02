@@ -29,13 +29,15 @@ class HarvestState {
     }
 
     var projects: [HarvestProject] {
-        return projectAssignments
+        return
+            projectAssignments
             .map { $0.project }
             .sorted { $0.name < $1.name }
     }
 
     var tasks: [HarvestTask] {
-        return projectAssignments
+        return
+            projectAssignments
             .flatMap { $0.taskAssignments }
             .map { $0.task }
             .sorted { $0.name < $1.name }
@@ -64,11 +66,13 @@ class HarvestState {
             return 0
         }
 
-        guard let daysSinceOldestEntry = Calendar.current.dateComponents(
-            [.day],
-            from: oldestDate,
-            to: Date()
-        ).day else {
+        guard
+            let daysSinceOldestEntry = Calendar.current.dateComponents(
+                [.day],
+                from: oldestDate,
+                to: Date()
+            ).day
+        else {
             return 0
         }
 
@@ -88,24 +92,30 @@ class HarvestState {
     var timeEntryTotalHoursInLastSevenDays: Double {
         let now = Date()
         guard let sixDaysAgoExactly = Calendar.current.date(byAdding: .day, value: -6, to: now),
-              let sixDaysAgoStartOfDay = DateFormatter.yyyyMMdd.date(from: DateFormatter.yyyyMMdd.string(from: sixDaysAgoExactly)),
-              let sevenDaysAgoExactly = Calendar.current.date(byAdding: .day, value: -7, to: now),
-              let sevenDaysAgoStartOfDay = DateFormatter.yyyyMMdd.date(from: DateFormatter.yyyyMMdd.string(from: sevenDaysAgoExactly)),
-              let todayInterval = Calendar.current.dateInterval(of: .day, for: now) else {
+            let sixDaysAgoStartOfDay = DateFormatter.yyyyMMdd.date(
+                from: DateFormatter.yyyyMMdd.string(from: sixDaysAgoExactly)),
+            let sevenDaysAgoExactly = Calendar.current.date(byAdding: .day, value: -7, to: now),
+            let sevenDaysAgoStartOfDay = DateFormatter.yyyyMMdd.date(
+                from: DateFormatter.yyyyMMdd.string(from: sevenDaysAgoExactly)),
+            let todayInterval = Calendar.current.dateInterval(of: .day, for: now)
+        else {
             return 0
         }
 
-        let hoursSinceSixDaysAgo = timeEntriesByDate
+        let hoursSinceSixDaysAgo =
+            timeEntriesByDate
             .filter { $0.key >= sixDaysAgoStartOfDay }
             .reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
 
-        let hoursSinceSevenDaysAgo = timeEntriesByDate
+        let hoursSinceSevenDaysAgo =
+            timeEntriesByDate
             .filter { $0.key >= sevenDaysAgoStartOfDay }
             .reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
 
         let hoursFromSevenDaysAgo = hoursSinceSevenDaysAgo - hoursSinceSixDaysAgo
 
-        let percentOfTodayCompleted = now.timeIntervalSince(todayInterval.start) / todayInterval.duration
+        let percentOfTodayCompleted =
+            now.timeIntervalSince(todayInterval.start) / todayInterval.duration
 
         return hoursSinceSixDaysAgo + (1 - percentOfTodayCompleted) * hoursFromSevenDaysAgo
     }
@@ -127,7 +137,8 @@ class HarvestState {
     // MARK: Authorization Alert State
     var showingTokenAlert = false
     var tokenText = ""
-    @ObservationIgnored private var authorizationContinuation: CheckedContinuation<String, any Error>?
+    @ObservationIgnored private var authorizationContinuation:
+        CheckedContinuation<String, any Error>?
 
     init(api: Harvester) {
         self.api = api
@@ -212,40 +223,48 @@ class HarvestState {
         }
     }
 
-    func startTimeEntryWith(client: HarvestClient, hours: Double, notes: String?, project: HarvestProject, spentDate: Date, task: HarvestTask) {
+    func startTimeEntryWith(
+        client: HarvestClient, hours: Double, notes: String?, project: HarvestProject,
+        spentDate: Date,
+        task: HarvestTask
+    ) {
         // Perform a quick local stop of all running time entries.
         while timeEntries.contains(where: { $0.isRunning }) {
             if let index = timeEntries.firstIndex(where: { $0.isRunning }) {
-                let stopped = HarvestTimeEntry(id: timeEntries[index].id,
-                                               spentDate: timeEntries[index].spentDate,
-                                               client: timeEntries[index].client,
-                                               project: timeEntries[index].project,
-                                               task: timeEntries[index].task,
-                                               hours: timeEntries[index].hours,
-                                               notes: timeEntries[index].notes,
-                                               startedTime: timeEntries[index].startedTime,
-                                               endedTime: timeEntries[index].endedTime,
-                                               isRunning: false)
+                let stopped = HarvestTimeEntry(
+                    id: timeEntries[index].id,
+                    spentDate: timeEntries[index].spentDate,
+                    client: timeEntries[index].client,
+                    project: timeEntries[index].project,
+                    task: timeEntries[index].task,
+                    hours: timeEntries[index].hours,
+                    notes: timeEntries[index].notes,
+                    startedTime: timeEntries[index].startedTime,
+                    endedTime: timeEntries[index].endedTime,
+                    isRunning: false)
                 timeEntries[index] = stopped
             }
         }
         // Perform a quick local start.
-        let timeEntry = HarvestTimeEntry(id: -Int.random(in: 1000...10000),
-                                         spentDate: DateFormatter.yyyyMMdd.string(from: spentDate),
-                                         client: client,
-                                         project: project,
-                                         task: task,
-                                         hours: hours,
-                                         notes: notes,
-                                         startedTime: nil,
-                                         endedTime: nil,
-                                         isRunning: true)
+        let timeEntry = HarvestTimeEntry(
+            id: -Int.random(in: 1000...10000),
+            spentDate: DateFormatter.yyyyMMdd.string(from: spentDate),
+            client: client,
+            project: project,
+            task: task,
+            hours: hours,
+            notes: notes,
+            startedTime: nil,
+            endedTime: nil,
+            isRunning: true)
         timeEntries.insert(timeEntry, at: 0)
 
         // Start on the server and reload.
         Task {
             do {
-                let created = try await api.startTimeEntryWith(hours: hours, notes: notes, projectId: project.id, spentDate: spentDate, taskId: task.id)
+                let created = try await api.startTimeEntryWith(
+                    hours: hours, notes: notes, projectId: project.id, spentDate: spentDate,
+                    taskId: task.id)
                 _ = try? await api.restartTimeEntry(created)
             } catch {
                 print("Failed to create time entry: \(error)")
@@ -257,16 +276,17 @@ class HarvestState {
     func stopTimeEntry(_ timeEntry: HarvestTimeEntry) {
         // Perform a quick local stop.
         if let index = timeEntries.firstIndex(where: { $0.id == timeEntry.id }) {
-            let stopped = HarvestTimeEntry(id: timeEntry.id,
-                                           spentDate: timeEntry.spentDate,
-                                           client: timeEntry.client,
-                                           project: timeEntry.project,
-                                           task: timeEntry.task,
-                                           hours: timeEntry.hours,
-                                           notes: timeEntry.notes,
-                                           startedTime: timeEntry.startedTime,
-                                           endedTime: timeEntry.endedTime,
-                                           isRunning: false)
+            let stopped = HarvestTimeEntry(
+                id: timeEntry.id,
+                spentDate: timeEntry.spentDate,
+                client: timeEntry.client,
+                project: timeEntry.project,
+                task: timeEntry.task,
+                hours: timeEntry.hours,
+                notes: timeEntry.notes,
+                startedTime: timeEntry.startedTime,
+                endedTime: timeEntry.endedTime,
+                isRunning: false)
             timeEntries[index] = stopped
         }
 

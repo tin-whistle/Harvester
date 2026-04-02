@@ -1,7 +1,7 @@
-import SwiftUI
 import Harvester
+import SwiftUI
 
-struct EditTimeEntryView : View {
+struct EditTimeEntryView: View {
 
     enum Modification<T> {
         case modified(_: T)
@@ -181,25 +181,27 @@ struct EditTimeEntryView : View {
     private func save() {
         if let originalTimeEntry = originalTimeEntry {
             guard let client = client, let project = project, let task = task else { return }
-            let updatedTimeEntry = HarvestTimeEntry(id: originalTimeEntry.id,
-                                                    spentDate: originalTimeEntry.spentDate,
-                                                    client: client,
-                                                    project: project,
-                                                    task: task,
-                                                    hours: hours,
-                                                    notes: notes,
-                                                    startedTime: originalTimeEntry.startedTime,
-                                                    endedTime: originalTimeEntry.endedTime,
-                                                    isRunning: originalTimeEntry.isRunning)
+            let updatedTimeEntry = HarvestTimeEntry(
+                id: originalTimeEntry.id,
+                spentDate: originalTimeEntry.spentDate,
+                client: client,
+                project: project,
+                task: task,
+                hours: hours,
+                notes: notes,
+                startedTime: originalTimeEntry.startedTime,
+                endedTime: originalTimeEntry.endedTime,
+                isRunning: originalTimeEntry.isRunning)
             harvest.updateTimeEntry(updatedTimeEntry)
         } else {
             guard let client = client, let project = project, let task = task else { return }
-            harvest.startTimeEntryWith(client: client,
-                                       hours: hours,
-                                       notes: notes,
-                                       project: project,
-                                       spentDate: Date(),
-                                       task: task)
+            harvest.startTimeEntryWith(
+                client: client,
+                hours: hours,
+                notes: notes,
+                project: project,
+                spentDate: Date(),
+                task: task)
         }
         show = false
     }
@@ -236,10 +238,13 @@ struct EditTimeEntryView : View {
         }
     }
 
-    private func buildActionSheet<T>(title: String, items: [T], map: (T) -> ActionSheet.Button) -> ActionSheet {
-        ActionSheet(title: Text(title),
-                    message: nil,
-                    buttons: items.map(map) + [ActionSheet.Button.cancel(Text("Cancel"))])
+    private func buildActionSheet<T>(title: String, items: [T], map: (T) -> ActionSheet.Button)
+        -> ActionSheet
+    {
+        ActionSheet(
+            title: Text(title),
+            message: nil,
+            buttons: items.map(map) + [ActionSheet.Button.cancel(Text("Cancel"))])
     }
 
     private func selectClient() {

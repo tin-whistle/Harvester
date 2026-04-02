@@ -5,7 +5,7 @@ public struct HarvestUser: Codable, Sendable {
     public let firstName: String
     public let lastName: String
     public let avatarURL: URL
-    
+
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case firstName = "first_name"

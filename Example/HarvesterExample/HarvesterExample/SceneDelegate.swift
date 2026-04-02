@@ -1,12 +1,15 @@
-import UIKit
-import SwiftUI
 import Harvester
+import SwiftUI
+import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    func scene(
+        _ scene: UIScene, willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
@@ -16,15 +19,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let window = UIWindow(windowScene: windowScene)
 
             guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-                  let harvest = appDelegate.harvest else {
+                let harvest = appDelegate.harvest
+            else {
                 fatalError("Failed to find HarvestAPI.")
             }
 
             // Create the main view and set up the authorization handler.
             let harvestState = HarvestState(api: harvest)
             harvestState.setupAuthorizationHandler(on: appDelegate.authorizationProvider)
-            let hostingController = UIHostingController(rootView: MainView()
-                .environment(harvestState))
+            let hostingController = UIHostingController(
+                rootView: MainView()
+                    .environment(harvestState))
             window.rootViewController = hostingController
             self.window = window
             window.makeKeyAndVisible()
@@ -59,4 +64,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 }
-

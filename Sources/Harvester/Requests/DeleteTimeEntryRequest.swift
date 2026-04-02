@@ -9,4 +9,3 @@ struct DeleteTimeEntryRequest: NetworkRequest {
     let method: HTTPMethod = .delete
     let timeEntry: HarvestTimeEntry
 }
-

@@ -14,9 +14,9 @@ struct TasksView: View {
 }
 
 #if DEBUG
-struct TasksView_Previews: PreviewProvider {
-    static var previews: some View {
-        TasksView(projectAssignment: nil)
+    struct TasksView_Previews: PreviewProvider {
+        static var previews: some View {
+            TasksView(projectAssignment: nil)
+        }
     }
-}
 #endif

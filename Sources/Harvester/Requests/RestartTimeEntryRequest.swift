@@ -7,4 +7,3 @@ struct RestartTimeEntryRequest: NetworkRequest {
     let method: HTTPMethod = .patch(nil)
     let timeEntry: HarvestTimeEntry
 }
-

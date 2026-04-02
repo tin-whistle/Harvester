@@ -18,10 +18,10 @@ struct ProjectsView: View {
 }
 
 #if DEBUG
-struct ProjectsView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProjectsView()
-            .environment(HarvestState(api: PreviewHarvester()))
+    struct ProjectsView_Previews: PreviewProvider {
+        static var previews: some View {
+            ProjectsView()
+                .environment(HarvestState(api: PreviewHarvester()))
+        }
     }
-}
 #endif

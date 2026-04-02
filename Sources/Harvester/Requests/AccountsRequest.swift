@@ -2,7 +2,7 @@ import Foundation
 
 struct AccountsRequest: NetworkRequest {
     typealias Response = AccountsResponse
-    
+
     var endpoint: NetworkEndpoint {
         return .fullURL(URL(string: "https://id.getharvest.com/api/v2/accounts")!)
     }

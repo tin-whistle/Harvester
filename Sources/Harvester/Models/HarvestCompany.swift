@@ -17,7 +17,7 @@ public struct HarvestCompany: Decodable, Sendable {
     public let invoiceFeature: Bool
     public let estimateFeature: Bool
     public let approvalFeature: Bool
-    
+
     enum CodingKeys: String, CodingKey {
         case baseURL = "base_uri"
         case fullDomain = "full_domain"
@@ -36,18 +36,18 @@ public struct HarvestCompany: Decodable, Sendable {
         case estimateFeature = "estimate_feature"
         case approvalFeature = "approval_feature"
     }
-    
+
     public enum WeekStartDay: String, Codable, Sendable {
         case saturday = "Saturday"
         case sunday = "Sunday"
         case monday = "Monday"
     }
-    
+
     public enum TimeFormat: String, Codable, Sendable {
         case decimal = "decimal"
         case hoursMinutes = "hoursMinutes"
     }
-    
+
     public enum Clock: String, Codable, Sendable {
         case twelveHour = "12h"
         case twentyFourHour = "24h"

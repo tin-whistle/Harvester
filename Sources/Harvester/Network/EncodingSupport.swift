@@ -8,7 +8,7 @@ extension Encodable {
     }
 }
 
-struct AnyEncodable : Encodable {
+struct AnyEncodable: Encodable {
     var value: Encodable
     init(_ value: Encodable) {
         self.value = value

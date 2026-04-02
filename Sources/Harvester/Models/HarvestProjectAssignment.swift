@@ -10,7 +10,7 @@ public struct HarvestProjectAssignment: Decodable, Sendable {
     public let project: HarvestProject
     public let client: HarvestClient
     public let taskAssignments: [HarvestTaskAssignment]
-    
+
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case isActive = "is_active"

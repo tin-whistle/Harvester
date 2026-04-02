@@ -1,7 +1,7 @@
 import Harvester
 import SwiftUI
 
-struct AccountsView : View {
+struct AccountsView: View {
     @Environment(HarvestState.self) var harvest
 
     var body: some View {
@@ -18,10 +18,10 @@ struct AccountsView : View {
 }
 
 #if DEBUG
-struct AccountsView_Previews : PreviewProvider {
-    static var previews: some View {
-        AccountsView()
-            .environment(HarvestState(api: PreviewHarvester()))
+    struct AccountsView_Previews: PreviewProvider {
+        static var previews: some View {
+            AccountsView()
+                .environment(HarvestState(api: PreviewHarvester()))
+        }
     }
-}
 #endif

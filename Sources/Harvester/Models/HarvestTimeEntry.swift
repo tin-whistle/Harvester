@@ -6,40 +6,42 @@ public struct HarvestTimeEntry: Decodable, Identifiable, Sendable {
     public let client: HarvestClient
     public let project: HarvestProject
     public let task: HarvestTask
-//    public let taskAssignment: HarvestTaskAssignment
+    //    public let taskAssignment: HarvestTaskAssignment
     public let hours: Double
     public let notes: String?
-//    public let timerStartedAt: String
+    //    public let timerStartedAt: String
     public let startedTime: String?
     public let endedTime: String?
     public let isRunning: Bool
     public private(set) var isDirty: Bool = false
-    
+
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case spentDate = "spent_date"
         case client = "client"
         case project = "project"
         case task = "task"
-//        case taskAssignment = "task_assignment"
+        //        case taskAssignment = "task_assignment"
         case hours = "hours"
         case notes = "notes"
-//        case timerStartedAt = "timer_started_at"
+        //        case timerStartedAt = "timer_started_at"
         case startedTime = "started_time"
         case endedTime = "ended_time"
         case isRunning = "is_running"
     }
 
-    public init(id: Int,
-                spentDate: String,
-                client: HarvestClient,
-                project: HarvestProject,
-                task: HarvestTask,
-                hours: Double,
-                notes: String?,
-                startedTime: String?,
-                endedTime: String?,
-                isRunning: Bool) {
+    public init(
+        id: Int,
+        spentDate: String,
+        client: HarvestClient,
+        project: HarvestProject,
+        task: HarvestTask,
+        hours: Double,
+        notes: String?,
+        startedTime: String?,
+        endedTime: String?,
+        isRunning: Bool
+    ) {
         self.id = id
         self.spentDate = spentDate
         self.client = client

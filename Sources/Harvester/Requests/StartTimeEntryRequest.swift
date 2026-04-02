@@ -34,7 +34,7 @@ struct StartTimeEntryRequest: NetworkRequest, Encodable {
 }
 
 extension DateFormatter {
-    static let yyyyMMdd: ISO8601DateFormatter = {
+    nonisolated(unsafe) static let yyyyMMdd: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
         formatter.timeZone = TimeZone.current

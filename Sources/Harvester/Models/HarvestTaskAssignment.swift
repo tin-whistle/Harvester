@@ -7,7 +7,7 @@ public struct HarvestTaskAssignment: Decodable, Sendable {
     public let billable: Bool
     public let created: String
     public let updated: String
-    
+
     enum CodingKeys: String, CodingKey {
         case id = "id"
         case task = "task"

@@ -1,7 +1,7 @@
-import SwiftUI
 import Harvester
+import SwiftUI
 
-struct ExploreView : View {
+struct ExploreView: View {
     @Environment(HarvestState.self) var harvest
 
     var body: some View {
