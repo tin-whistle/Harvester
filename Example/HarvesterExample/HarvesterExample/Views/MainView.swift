@@ -6,53 +6,118 @@ struct MainView: View {
 
     @State private var modalSelection = ModalSelection.explore
     @State private var showModal = false
-    @State private var showSheet = false
 
-    private var actionSheetButtons: [ActionSheet.Button] {
-        var buttons: [ActionSheet.Button] = []
-        if self.harvest.isAuthorized {
-            buttons.append(
-                .default(Text("Sign Out")) {
-                    self.harvest.deauthorize()
-                })
-            buttons.append(
-                .default(Text("Select Account")) {
-                    self.modalSelection = .selectAccount
-                    self.showModal = true
-                })
-            buttons.append(
-                .default(Text("Explore API")) {
-                    self.modalSelection = .explore
-                    self.showModal = true
-                })
-        } else {
-            buttons.append(
-                .default(Text("Sign In")) {
-                    Task { await self.harvest.authorize() }
-                })
+
+    private var recentTasksByClient: [ClientTaskGroup] {
+        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+        let formatter = DateFormatter.yyyyMMdd
+
+        // Count occurrences of each unique task within the last month.
+        var countsByClient: [Int: [String: (count: Int, task: RecentTask)]] = [:]
+        var clientOrder: [HarvestClient] = []
+
+        for entry in harvest.timeEntries {
+            guard let entryDate = formatter.date(from: entry.spentDate),
+                entryDate >= oneMonthAgo
+            else { continue }
+
+            let key = "\(entry.project.id)-\(entry.task.id)-\(entry.notes ?? "")"
+            if countsByClient[entry.client.id] == nil {
+                countsByClient[entry.client.id] = [:]
+                clientOrder.append(entry.client)
+            }
+            if let existing = countsByClient[entry.client.id]![key] {
+                countsByClient[entry.client.id]![key] = (count: existing.count + 1, task: existing.task)
+            } else {
+                countsByClient[entry.client.id]![key] = (
+                    count: 1,
+                    task: RecentTask(
+                        client: entry.client,
+                        project: entry.project,
+                        task: entry.task,
+                        notes: entry.notes)
+                )
+            }
         }
 
-        buttons.append(.cancel())
-
-        return buttons
+        // Return the top 5 most-used tasks per client.
+        return clientOrder.map { client in
+            let sorted = (countsByClient[client.id] ?? [:]).values
+                .sorted { $0.count > $1.count }
+                .prefix(5)
+                .map { $0.task }
+            return ClientTaskGroup(client: client, tasks: sorted)
+        }
     }
 
     var addButton: some View {
-        Button(action: {
-            self.modalSelection = .addTimeEntry
-            self.showModal = true
-        }) {
+        Menu {
+            if !harvest.timeEntries.isEmpty {
+                ForEach(recentTasksByClient) { group in
+                    Section(group.client.name) {
+                        ForEach(group.tasks) { recentTask in
+                            Button {
+                                harvest.startTimeEntryWith(
+                                    client: recentTask.client,
+                                    hours: 0,
+                                    notes: recentTask.notes,
+                                    project: recentTask.project,
+                                    spentDate: Date(),
+                                    task: recentTask.task)
+                            } label: {
+                                if let notes = recentTask.notes, !notes.isEmpty {
+                                    Text(notes)
+                                } else {
+                                    Text("\(recentTask.project.name) — \(recentTask.task.name)")
+                                }
+                            }
+                        }
+                    }
+                }
+                Divider()
+            }
+            Button {
+                self.modalSelection = .addTimeEntry
+                self.showModal = true
+            } label: {
+                Label("New Time Entry…", systemImage: "square.and.pencil")
+            }
+        } label: {
             Image(systemName: "plus")
-                .frame(minWidth: 40, idealWidth: 60, minHeight: 40, alignment: .leading)
         }
     }
 
     var setupButton: some View {
-        Button(action: {
-            self.showSheet = true
-        }) {
-            Text("Setup")
+        Menu {
+            if harvest.isAuthorized {
+                Button("Sign Out") {
+                    harvest.deauthorize()
+                }
+                Button("Select Account") {
+                    modalSelection = .selectAccount
+                    showModal = true
+                }
+                Button("Explore API") {
+                    modalSelection = .explore
+                    showModal = true
+                }
+            } else {
+                Button("Sign In") {
+                    Task { await harvest.authorize() }
+                }
+            }
+        } label: {
+            if let userImage = harvest.userImage {
+                Image(uiImage: userImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 44, height: 44)
+                    .clipShape(Circle())
+            } else {
+                Text("Setup")
+            }
         }
+        .menuIndicator(.hidden)
     }
 
     @Environment(\.openURL) private var openURL
@@ -79,10 +144,8 @@ struct MainView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     setupButton
                 }
+                .sharedBackgroundVisibility(.hidden)
             }
-        }
-        .actionSheet(isPresented: self.$showSheet) {
-            ActionSheet(title: Text("Setup"), message: nil, buttons: self.actionSheetButtons)
         }
         .sheet(
             isPresented: self.$showModal,
@@ -103,6 +166,11 @@ struct MainView: View {
                 NavigationStack {
                     SelectAccountView(show: self.$showModal).environment(self.harvest)
                 }
+            }
+        }
+        .onChange(of: harvest.isAuthorized, initial: true) {
+            if harvest.isAuthorized && harvest.userImage == nil {
+                Task { await harvest.loadUser() }
             }
         }
         .alert("Authorization", isPresented: $harvest.showingTokenAlert) {
@@ -128,6 +196,20 @@ enum ModalSelection {
     case addTimeEntry
     case explore
     case selectAccount
+}
+
+private struct RecentTask: Identifiable {
+    let client: HarvestClient
+    let project: HarvestProject
+    let task: HarvestTask
+    let notes: String?
+    var id: String { "\(client.id)-\(project.id)-\(task.id)-\(notes ?? "")" }
+}
+
+private struct ClientTaskGroup: Identifiable {
+    let client: HarvestClient
+    let tasks: [RecentTask]
+    var id: Int { client.id }
 }
 
 #if DEBUG
