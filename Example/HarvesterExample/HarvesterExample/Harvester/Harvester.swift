@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 import Harvester
 
@@ -6,19 +5,18 @@ protocol Harvester {
     var currentAccountId: Int? { get set }
     var isAuthorized: Bool { get }
     var wantsTimestampTimers: Bool? { get }
-    func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void)
+    func authorize() async throws -> Bool
     func deauthorize() throws
-    func getAccounts(completion: @escaping (Result<[HarvestAccount], HarvestError>) -> Void)
-    func getMe(completion: @escaping (Result<HarvestUser, HarvestError>) -> Void)
-    func getProjectAssignments(completion: @escaping (Result<[HarvestProjectAssignment], HarvestError>) -> Void)
-    func getTimeEntries(_ completion: @escaping (Result<[HarvestTimeEntry], HarvestError>) -> Void)
-    func getCompany(_ completion: @escaping (Result<HarvestCompany, HarvestError>) -> Void)
-    func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void)
-    func stopTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void)
-    func restartTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void)
-    func deleteTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void)
-    func updateTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void)
-
+    func getAccounts() async throws -> [HarvestAccount]
+    func getMe() async throws -> HarvestUser
+    func getProjectAssignments() async throws -> [HarvestProjectAssignment]
+    func getTimeEntries() async throws -> [HarvestTimeEntry]
+    func getCompany() async throws -> HarvestCompany
+    func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int) async throws -> HarvestTimeEntry
+    func stopTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry
+    func restartTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry
+    func deleteTimeEntry(_ timeEntry: HarvestTimeEntry) async throws
+    func updateTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry
 }
 
 extension HarvestAPI: Harvester {
@@ -32,28 +30,29 @@ class PreviewHarvester: Harvester {
 
     var wantsTimestampTimers: Bool? = true
 
-    func authorize(completion: @escaping (Result<Bool, HarvestError>) -> Void) {
+    func authorize() async throws -> Bool {
         isAuthorized = true
+        return true
     }
     
     func deauthorize() throws {
         isAuthorized = false
     }
     
-    func getAccounts(completion: @escaping (Result<[HarvestAccount], HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func getAccounts() async throws -> [HarvestAccount] {
+        throw HarvestError.unauthorized
     }
     
-    func getMe(completion: @escaping (Result<HarvestUser, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func getMe() async throws -> HarvestUser {
+        throw HarvestError.unauthorized
     }
     
-    func getProjectAssignments(completion: @escaping (Result<[HarvestProjectAssignment], HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func getProjectAssignments() async throws -> [HarvestProjectAssignment] {
+        throw HarvestError.unauthorized
     }
     
-    func getTimeEntries(_ completion: @escaping (Result<[HarvestTimeEntry], HarvestError>) -> Void) {
-        completion(.success([
+    func getTimeEntries() async throws -> [HarvestTimeEntry] {
+        return [
             HarvestTimeEntry(id: 0,
                              spentDate: "1984-01-02",
                              client: HarvestClient(id: 0,
@@ -82,31 +81,30 @@ class PreviewHarvester: Harvester {
                              startedTime: nil,
                              endedTime: nil,
                              isRunning: false)
-        ]))
-        completion(.failure(.unauthorized))
+        ]
     }
     
-    func getCompany(_ completion: @escaping (Result<HarvestCompany, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func getCompany() async throws -> HarvestCompany {
+        throw HarvestError.unauthorized
     }
 
-    func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int) async throws -> HarvestTimeEntry {
+        throw HarvestError.unauthorized
     }
 
-    func stopTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func stopTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry {
+        throw HarvestError.unauthorized
     }
 
-    func restartTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func restartTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry {
+        throw HarvestError.unauthorized
     }
 
-    func deleteTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func deleteTimeEntry(_ timeEntry: HarvestTimeEntry) async throws {
+        throw HarvestError.unauthorized
     }
 
-    func updateTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        completion(.failure(.unauthorized))
+    func updateTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry {
+        throw HarvestError.unauthorized
     }
 }

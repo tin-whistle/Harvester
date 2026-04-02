@@ -3,6 +3,7 @@ import Foundation
 import Harvester
 import UIKit
 
+@MainActor
 class HarvestState: ObservableObject {
     private var api: Harvester
 
@@ -128,16 +129,12 @@ class HarvestState: ObservableObject {
         isAuthorized = api.isAuthorized
     }
 
-    func authorize() {
-        api.authorize { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .failure(let error):
-                    print("Failed to authorize with Harvest: \(error)")
-                case .success(let isAuthorized):
-                    self?.isAuthorized = isAuthorized
-                }
-            }
+    func authorize() async {
+        do {
+            let result = try await api.authorize()
+            isAuthorized = result
+        } catch {
+            print("Failed to authorize with Harvest: \(error)")
         }
     }
 
@@ -146,73 +143,46 @@ class HarvestState: ObservableObject {
         isAuthorized = api.isAuthorized
     }
 
-    func loadAccounts() {
-        api.getAccounts { result in
-            DispatchQueue.main.async {
-                switch result {
-                case let .success(accounts):
-                    self.accounts = accounts
-                case .failure(let error):
-                    print("Failed to load accounts: \(error)")
-                }
-            }
+    func loadAccounts() async {
+        do {
+            accounts = try await api.getAccounts()
+        } catch {
+            print("Failed to load accounts: \(error)")
         }
     }
 
-    func loadCompany() {
-        api.getCompany { result in
-            DispatchQueue.main.async {
-                switch result {
-                case let .success(company):
-                    self.company = company
-                case .failure(let error):
-                    print("Failed to load company: \(error)")
-                }
-            }
+    func loadCompany() async {
+        do {
+            company = try await api.getCompany()
+        } catch {
+            print("Failed to load company: \(error)")
         }
     }
 
-    func loadProjectAssignments(_ completion: (() -> Void)? = nil) {
-        api.getProjectAssignments { result in
-            DispatchQueue.main.async {
-                switch result {
-                case let .success(projectAssignments):
-                    self.projectAssignments = projectAssignments
-                case .failure:
-                    break
-                }
-                completion?()
-            }
+    func loadProjectAssignments() async {
+        do {
+            projectAssignments = try await api.getProjectAssignments()
+        } catch {
+            // silently fail
         }
     }
 
-    func loadTimeEntries() {
-        api.getTimeEntries { result in
-            DispatchQueue.main.async {
-                switch result {
-                case let .success(timeEntries):
-                    self.timeEntries = timeEntries
-                case let .failure(error):
-                    print("Failed to load time entries: \(error)")
-                }
-            }
+    func loadTimeEntries() async {
+        do {
+            timeEntries = try await api.getTimeEntries()
+        } catch {
+            print("Failed to load time entries: \(error)")
         }
     }
 
-    func loadUser() {
-        api.getMe { result in
-            DispatchQueue.main.async {
-                switch result {
-                case let .success(user):
-                    self.user = user
-                    URLSession.shared.dataTask(with: user.avatarURL) { data, response, error in
-                        guard let data = data, let image = UIImage(data: data) else { return }
-                        self.userImage = image
-                    }.resume()
-                case .failure(let error):
-                    print("Failed to load user: \(error)")
-                }
-            }
+    func loadUser() async {
+        do {
+            let user = try await api.getMe()
+            self.user = user
+            let (data, _) = try await URLSession.shared.data(from: user.avatarURL)
+            self.userImage = UIImage(data: data)
+        } catch {
+            print("Failed to load user: \(error)")
         }
     }
 
@@ -246,18 +216,15 @@ class HarvestState: ObservableObject {
                                          isRunning: true)
         timeEntries.insert(timeEntry, at: 0)
 
-
         // Start on the server and reload.
-        api.startTimeEntryWith(hours: hours, notes: notes, projectId: project.id, spentDate: spentDate, taskId: task.id) { [weak self] result in
-            switch result {
-            case .success(let timeEntry):
-                self?.api.restartTimeEntry(timeEntry) { _ in
-                    self?.loadTimeEntries()
-                }
-            case .failure(let error):
+        Task {
+            do {
+                let created = try await api.startTimeEntryWith(hours: hours, notes: notes, projectId: project.id, spentDate: spentDate, taskId: task.id)
+                _ = try? await api.restartTimeEntry(created)
+            } catch {
                 print("Failed to create time entry: \(error)")
-                self?.loadTimeEntries()
             }
+            await loadTimeEntries()
         }
     }
 
@@ -278,8 +245,9 @@ class HarvestState: ObservableObject {
         }
 
         // Stop on the server and reload.
-        api.stopTimeEntry(timeEntry) { [weak self] _ in
-            self?.loadTimeEntries()
+        Task {
+            _ = try? await api.stopTimeEntry(timeEntry)
+            await loadTimeEntries()
         }
     }
 
@@ -288,8 +256,9 @@ class HarvestState: ObservableObject {
         timeEntries.removeAll { $0.id == timeEntry.id }
 
         // Delete from the server and reload.
-        api.deleteTimeEntry(timeEntry) { [weak self] _ in
-            self?.loadTimeEntries()
+        Task {
+            try? await api.deleteTimeEntry(timeEntry)
+            await loadTimeEntries()
         }
     }
 
@@ -300,8 +269,9 @@ class HarvestState: ObservableObject {
         }
 
         // Update on the server and reload.
-        api.updateTimeEntry(timeEntry) { [weak self] _ in
-            self?.loadTimeEntries()
+        Task {
+            _ = try? await api.updateTimeEntry(timeEntry)
+            await loadTimeEntries()
         }
     }
 

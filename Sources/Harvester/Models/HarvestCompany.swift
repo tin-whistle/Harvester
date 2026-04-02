@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestCompany: Decodable {
+public struct HarvestCompany: Decodable, Sendable {
     public let baseURL: URL
     public let fullDomain: URL
     public let name: String
@@ -37,18 +37,18 @@ public struct HarvestCompany: Decodable {
         case approvalFeature = "approval_feature"
     }
     
-    public enum WeekStartDay: String, Codable {
+    public enum WeekStartDay: String, Codable, Sendable {
         case saturday = "Saturday"
         case sunday = "Sunday"
         case monday = "Monday"
     }
     
-    public enum TimeFormat: String, Codable {
+    public enum TimeFormat: String, Codable, Sendable {
         case decimal = "decimal"
         case hoursMinutes = "hoursMinutes"
     }
     
-    public enum Clock: String, Codable {
+    public enum Clock: String, Codable, Sendable {
         case twelveHour = "12h"
         case twentyFourHour = "24h"
     }

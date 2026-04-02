@@ -3,7 +3,7 @@ import Foundation
 protocol NetworkClient {
     var baseURL: URL { get }
     
-    func send<T: NetworkRequest, U>(_ request: T, completion: @escaping (Result<U, HarvestError>) -> Void) where U == T.Response
+    func send<T: NetworkRequest>(_ request: T) async throws -> T.Response
 }
 
 extension NetworkClient {

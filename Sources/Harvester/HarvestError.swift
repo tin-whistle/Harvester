@@ -1,4 +1,4 @@
-public enum HarvestError: Error {
+public enum HarvestError: Error, @unchecked Sendable {
     case authorization(Error)
     case decoding(Error)
     case encoding(Error)

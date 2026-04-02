@@ -11,8 +11,8 @@ struct ProjectsView: View {
                     Text("\(projectAssignment.client.name) -- \(projectAssignment.project.name)")
                 }
             }
-        }.onAppear {
-            self.harvest.loadProjectAssignments()
+        }.task {
+            await harvest.loadProjectAssignments()
         }.navigationBarTitle("Projects")
     }
 }

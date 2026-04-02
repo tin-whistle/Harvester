@@ -1,11 +1,8 @@
-import Combine
 import Harvester
 import SwiftUI
 
 struct TimeEntriesView : View {
     @EnvironmentObject var harvest: HarvestState
-    @State private var timeSubscription: AnyCancellable?
-    @State private var timer = CombineTimer()
 
     var body: some View {
         List {
@@ -65,12 +62,14 @@ struct TimeEntriesView : View {
                 }
             }
         }
-        .onAppear {
-            harvest.loadTimeEntries()
-        }
-        .onReceive(timer.publisher) { _ in
-            harvest.loadTimeEntries()
-            timer.interval = harvest.timeEntries.contains { $0.isRunning } ? 10 : 30
+        .task {
+            await harvest.loadTimeEntries()
+            while !Task.isCancelled {
+                let interval: UInt64 = harvest.timeEntries.contains(where: { $0.isRunning }) ? 10_000_000_000 : 30_000_000_000
+                try? await Task.sleep(nanoseconds: interval)
+                guard !Task.isCancelled else { break }
+                await harvest.loadTimeEntries()
+            }
         }
         .navigationBarTitle("Time Entries")
     }
@@ -107,29 +106,3 @@ struct TimeEntriesView_Previews : PreviewProvider {
     }
 }
 #endif
-
-class CombineTimer {
-    private let intervalSubject: CurrentValueSubject<TimeInterval, Never>
-
-    var interval: TimeInterval {
-        get {
-            intervalSubject.value
-        }
-        set {
-            intervalSubject.send(newValue)
-        }
-    }
-
-    var publisher: AnyPublisher<Date, Never> {
-        intervalSubject
-            .map {
-                Timer.TimerPublisher(interval: $0, runLoop: .main, mode: .default).autoconnect()
-            }
-            .switchToLatest()
-            .eraseToAnyPublisher()
-    }
-
-    init(interval: TimeInterval = 5.0) {
-        intervalSubject = CurrentValueSubject<TimeInterval, Never>(interval)
-    }
-}

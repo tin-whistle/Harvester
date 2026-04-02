@@ -33,29 +33,19 @@ public class HarvestAPI: ObservableObject {
         return networkClient.isAuthorized
     }
     
-    public func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void) {
-        networkClient.authorize { [weak self] authorizeResult in
-            if self?.isAuthorized ?? false {
-                self?.getAccounts { getAccountsResult in
-                    if case let .success(accounts) = getAccountsResult, accounts.count == 1 {
-                        self?.currentAccountId = accounts[0].id
-                        self?.getCompany { getCompanyResult in
-                            if case let .success(company) = getCompanyResult {
-                                self?.wantsTimestampTimers = company.wantsTimestampTimers
-                            }
-                            self?.objectWillChange.send()
-                            completion(authorizeResult)
-                        }
-                    } else {
-                        self?.objectWillChange.send()
-                        completion(authorizeResult)
-                    }
+    public func authorize() async throws -> Bool {
+        let authorized = try await networkClient.authorize()
+        if isAuthorized {
+            let accounts = try await getAccounts()
+            if accounts.count == 1 {
+                currentAccountId = accounts[0].id
+                if let company = try? await getCompany() {
+                    wantsTimestampTimers = company.wantsTimestampTimers
                 }
-            } else {
-                self?.objectWillChange.send()
-                completion(authorizeResult)
             }
         }
+        objectWillChange.send()
+        return authorized
     }
     
     public func deauthorize() throws {
@@ -67,50 +57,53 @@ public class HarvestAPI: ObservableObject {
 
     // MARK: Request Data
     
-    public func getAccounts(completion: @escaping (Result<[HarvestAccount], HarvestError>) -> Void) {
-        networkClient.send(AccountsRequest()) {
-            completion($0.map { $0.accounts })
+    public func getAccounts() async throws -> [HarvestAccount] {
+        let response: AccountsRequest.Response = try await networkClient.send(AccountsRequest())
+        return response.accounts
+    }
+    
+    public func getMe() async throws -> HarvestUser {
+        try await networkClient.send(UserRequest(userID: "me"))
+    }
+    
+    public func getProjectAssignments() async throws -> [HarvestProjectAssignment] {
+        let response: UserProjectAssignmentsRequest.Response = try await networkClient.send(UserProjectAssignmentsRequest(userID: "me"))
+        return response.projectAssignments
+    }
+    
+    public func getTimeEntries() async throws -> [HarvestTimeEntry] {
+        let response: TimeEntriesRequest.Response = try await networkClient.send(TimeEntriesRequest())
+        return response.timeEntries
+    }
+    
+    public func getCompany() async throws -> HarvestCompany {
+        try await networkClient.send(CompanyRequest())
+    }
+
+    public func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int) async throws -> HarvestTimeEntry {
+        try await networkClient.send(StartTimeEntryRequest(hours: hours, notes: notes, projectId: projectId, spentDate: spentDate, taskId: taskId))
+    }
+
+    public func stopTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry {
+        try await networkClient.send(StopTimeEntryRequest(timeEntry: timeEntry))
+    }
+
+    public func restartTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry {
+        try await networkClient.send(RestartTimeEntryRequest(timeEntry: timeEntry))
+    }
+
+    public func deleteTimeEntry(_ timeEntry: HarvestTimeEntry) async throws {
+        // DELETE returns empty body, so we expect a decode error
+        do {
+            let _: HarvestTimeEntry = try await networkClient.send(DeleteTimeEntryRequest(timeEntry: timeEntry))
+        } catch let error as HarvestError {
+            if case .decoding = error { return }
+            throw error
         }
     }
-    
-    public func getMe(completion: @escaping (Result<HarvestUser, HarvestError>) -> Void) {
-        networkClient.send(UserRequest(userID: "me"), completion: completion)
-    }
-    
-    public func getProjectAssignments(completion: @escaping (Result<[HarvestProjectAssignment], HarvestError>) -> Void) {
-        networkClient.send(UserProjectAssignmentsRequest(userID: "me")) {
-            completion($0.map { $0.projectAssignments })
-        }
-    }
-    
-    public func getTimeEntries(_ completion: @escaping (Result<[HarvestTimeEntry], HarvestError>) -> Void) {
-        networkClient.send(TimeEntriesRequest()) {
-           completion($0.map { $0.timeEntries })
-        }
-    }
-    
-    public func getCompany(_ completion: @escaping (Result<HarvestCompany, HarvestError>) -> Void) {
-        networkClient.send(CompanyRequest(), completion: completion)
-    }
 
-    public func startTimeEntryWith(hours: Double, notes: String?, projectId: Int, spentDate: Date, taskId: Int, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        networkClient.send(StartTimeEntryRequest(hours: hours, notes: notes, projectId: projectId, spentDate: spentDate, taskId: taskId), completion: completion)
-    }
-
-    public func stopTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        networkClient.send(StopTimeEntryRequest(timeEntry: timeEntry), completion: completion)
-    }
-
-    public func restartTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        networkClient.send(RestartTimeEntryRequest(timeEntry: timeEntry), completion: completion)
-    }
-
-    public func deleteTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        networkClient.send(DeleteTimeEntryRequest(timeEntry: timeEntry), completion: completion)
-    }
-
-    public func updateTimeEntry(_ timeEntry: HarvestTimeEntry, completion: @escaping (Result<HarvestTimeEntry, HarvestError>) -> Void) {
-        networkClient.send(UpdateTimeEntryRequest(timeEntry: timeEntry), completion: completion)
+    public func updateTimeEntry(_ timeEntry: HarvestTimeEntry) async throws -> HarvestTimeEntry {
+        try await networkClient.send(UpdateTimeEntryRequest(timeEntry: timeEntry))
     }
 
     // MARK: Initialization

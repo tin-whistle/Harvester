@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestTask: Decodable {
+public struct HarvestTask: Decodable, Sendable {
     public let id: Int
     public let name: String
 

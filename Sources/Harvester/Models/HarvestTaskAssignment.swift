@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestTaskAssignment: Decodable {
+public struct HarvestTaskAssignment: Decodable, Sendable {
     public let id: Int
     public let task: HarvestTask
     public let isActive: Bool

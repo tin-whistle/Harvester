@@ -24,7 +24,7 @@ struct MainView : View {
             })
         } else {
             buttons.append(.default(Text("Sign In")) {
-                self.harvest.authorize()
+                Task { await self.harvest.authorize() }
             })
         }
         
@@ -69,7 +69,7 @@ struct MainView : View {
             ActionSheet(title: Text("Setup"), message: nil, buttons: self.actionSheetButtons)
         }
         .sheet(isPresented: self.$showModal, onDismiss: {
-            self.harvest.loadTimeEntries()
+            Task { await self.harvest.loadTimeEntries() }
         }) {
             if self.modalSelection == .addTimeEntry {
                 NavigationView {

@@ -1,6 +1,6 @@
 import UIKit
 
-public class PersonalAccessTokenProvider {
+public final class PersonalAccessTokenProvider: @unchecked Sendable {
 
     public var authorizationParentViewController: UIViewController?
 
@@ -21,22 +21,30 @@ extension PersonalAccessTokenProvider: AuthorizationProvider {
         }
     }
 
-    public func authorize(completion: @escaping (Result<Bool, AuthorizationProviderError>) -> Void) {
-        let alert = UIAlertController(title: "Authorization", message: "Generate a personal access token at https://id.getharvest.com/developers", preferredStyle: .alert)
-        alert.addTextField { field in
-            field.placeholder = "Personal Access Token"
+    @MainActor
+    public func authorize() async throws -> Bool {
+        guard let viewController = authorizationParentViewController else {
+            throw AuthorizationProviderError.failed
         }
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak alert, weak self] action in
-            self?.accessToken = alert?.textFields?.first?.text
-            completion(.success(true))
-        })
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { action in
-            completion(.failure(.canceled))
-        })
-        alert.addAction(UIAlertAction(title: "Safari", style: .default) { action in
-            UIApplication.shared.open(URL(string: "https://id.getharvest.com/developers")!, options: [:], completionHandler: nil)
-        })
-        authorizationParentViewController?.present(alert, animated: true, completion: nil)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let alert = UIAlertController(title: "Authorization", message: "Generate a personal access token at https://id.getharvest.com/developers", preferredStyle: .alert)
+            alert.addTextField { field in
+                field.placeholder = "Personal Access Token"
+            }
+            alert.addAction(UIAlertAction(title: "OK", style: .default) { [weak alert, weak self] action in
+                self?.accessToken = alert?.textFields?.first?.text
+                continuation.resume(returning: true)
+            })
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { action in
+                continuation.resume(throwing: AuthorizationProviderError.canceled)
+            })
+            alert.addAction(UIAlertAction(title: "Safari", style: .default) { action in
+                UIApplication.shared.open(URL(string: "https://id.getharvest.com/developers")!, options: [:], completionHandler: nil)
+                continuation.resume(throwing: AuthorizationProviderError.canceled)
+            })
+            viewController.present(alert, animated: true, completion: nil)
+        }
     }
 
     public func deauthorize() throws {

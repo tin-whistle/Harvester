@@ -8,11 +8,10 @@ struct CompanyView: View {
         VStack {
             Text("\(harvest.company?.name ?? "")")
         }
-        .onAppear {
-            self.harvest.loadCompany()
+        .task {
+            await harvest.loadCompany()
         }
         .navigationBarTitle("Company")
-        .animation(.spring())
     }
 }
 

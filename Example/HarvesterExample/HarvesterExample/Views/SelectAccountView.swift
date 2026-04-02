@@ -17,8 +17,8 @@ struct SelectAccountView : View {
                 }
             }
         }
-        .onAppear {
-            self.harvest.loadAccounts()
+        .task {
+            await self.harvest.loadAccounts()
         }
         .navigationBarTitle("Select Account")
     }

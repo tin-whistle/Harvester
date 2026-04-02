@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestAccount: Decodable {
+public struct HarvestAccount: Decodable, Sendable {
     public let id: Int
     public let name: String
     public let product: HarvestProduct
@@ -11,7 +11,7 @@ public struct HarvestAccount: Decodable {
         self.product = product
     }
     
-    public enum HarvestProduct: String, Codable {
+    public enum HarvestProduct: String, Codable, Sendable {
         case harvest = "harvest"
         case forecast = "forecast"
     }

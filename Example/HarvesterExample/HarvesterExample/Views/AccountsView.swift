@@ -11,8 +11,8 @@ struct AccountsView : View {
                     Text(account.name)
                 }
             }
-        }.onAppear {
-            self.harvest.loadAccounts()
+        }.task {
+            await harvest.loadAccounts()
         }.navigationBarTitle("Accounts")
     }
 }

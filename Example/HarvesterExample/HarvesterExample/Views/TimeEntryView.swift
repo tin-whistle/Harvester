@@ -71,7 +71,7 @@ struct TimeEntryView: View {
                 }
             }
             .sheet(isPresented: $showEditModal, onDismiss: {
-                model.harvest.loadTimeEntries()
+                Task { await model.harvest.loadTimeEntries() }
             }) {
                 NavigationView {
                     EditTimeEntryView(show: $showEditModal, originalTimeEntry: model.timeEntry)

@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 import Harvester
 import SwiftUI
@@ -18,11 +17,10 @@ struct UserView: View {
             Image(uiImage: harvest.userImage ?? UIImage()).mask(Circle())
             Text("\(userName)")
         }
-        .onAppear {
-            self.harvest.loadUser()
+        .task {
+            await harvest.loadUser()
         }
         .navigationBarTitle("User")
-        .animation(.spring())
     }
 }
 

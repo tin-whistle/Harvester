@@ -156,15 +156,16 @@ struct EditTimeEntryView : View {
             }
         }
         .onAppear {
-            self.harvest.loadProjectAssignments() {
-                if !self.clients.isEmpty && self.client == nil {
-                    self.selectClient()
-                }
-            }
             self.notes = self.originalTimeEntry?.notes ?? ""
             let hours = self.originalTimeEntry?.hours ?? 0
             self.hourComponent = hours.hourComponentFromHours()
             self.minuteComponent = hours.minuteComponentFromHours()
+        }
+        .task {
+            await harvest.loadProjectAssignments()
+            if !clients.isEmpty && client == nil {
+                selectClient()
+            }
         }
         .navigationBarTitle(originalTimeEntry == nil ? "Add Time Entry" : "Edit Time Entry")
         .navigationBarItems(leading: cancelButton, trailing: saveButton)

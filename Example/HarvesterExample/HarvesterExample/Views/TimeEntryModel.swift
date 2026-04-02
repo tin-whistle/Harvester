@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import Harvester
 
+@MainActor
 class TimeEntryModel: ObservableObject {
 
     var harvest: HarvestState

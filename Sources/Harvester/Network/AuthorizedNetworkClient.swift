@@ -1,11 +1,11 @@
-import UIKit
+import Foundation
 
 protocol AuthorizedNetworkClient: NetworkClient {
     var accountId: Int? { get set }
     
     var isAuthorized: Bool { get }
     
-    func authorize(completion: @escaping (_ result: Result<Bool, HarvestError>) -> Void)
+    func authorize() async throws -> Bool
 
     func deauthorize() throws
 }

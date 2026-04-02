@@ -1,6 +1,6 @@
 import Foundation
 
-public struct HarvestTimeEntry: Decodable, Identifiable {
+public struct HarvestTimeEntry: Decodable, Identifiable, Sendable {
     public let id: Int
     public let spentDate: String
     public let client: HarvestClient
