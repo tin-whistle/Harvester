@@ -17,16 +17,25 @@ struct TimeEntriesView : View {
                 }) {
                     HStack {
                         VStack(alignment: .leading) {
-                            Text("\(self.harvest.timeEntryTotalHoursInLastSevenDays.formattedHours())")
+                            Text("\(harvest.timeEntryWeeklyAverage.formattedHours())")
                                 .font(.headline)
-                            Text("Last 7 Days")
+                            Text("Weekly Average")
                                 .font(.caption)
                                 .lineLimit(20)
                                 .multilineTextAlignment(.leading)
                         }
                         .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .center) {
+                            Text("\(harvest.timeEntryTotalHoursInLastSevenDays.formattedHours())")
+                                .font(.headline)
+                            Text("Last 7 Days")
+                                .font(.caption)
+                                .lineLimit(20)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                         VStack(alignment: .trailing) {
-                            Text("\(self.harvest.timeEntryTotalHoursThisWeek.formattedHours())")
+                            Text("\(harvest.timeEntryTotalHoursThisWeek.formattedHours())")
                                 .font(.headline)
                             Text("This Week")
                                 .font(.caption)
@@ -42,26 +51,26 @@ struct TimeEntriesView : View {
                     Text("\(DateFormatter.harvestDateFormatter.string(from: date))")
                         .font(.headline)
                     Spacer()
-                    Text("\((self.harvest.timeEntryTotalHoursByDate[date] ?? 0).formattedHours())")
+                    Text("\((harvest.timeEntryTotalHoursByDate[date] ?? 0).formattedHours())")
                         .font(.headline)
                 }) {
-                    ForEach(self.harvest.timeEntriesByDate[date] ?? [], id: \.id) { timeEntry in
-                        TimeEntryView(timeEntry: timeEntry)
+                    ForEach(harvest.timeEntriesByDate[date] ?? [], id: \.id) { timeEntry in
+                        TimeEntryView(model: TimeEntryModel(harvest: harvest, timeEntryId: timeEntry.id))
                     }
                     .onDelete { indexSet in
-                        guard let firstValidIndex = indexSet.first(where: { $0 < self.harvest.timeEntries.count }) else { return }
-                        let entryToRemove = self.harvest.timeEntries[firstValidIndex]
-                        self.harvest.deleteTimeEntry(entryToRemove)
+                        guard let firstValidIndex = indexSet.first(where: { $0 < harvest.timeEntries.count }) else { return }
+                        let entryToRemove = harvest.timeEntries[firstValidIndex]
+                        harvest.deleteTimeEntry(entryToRemove)
                     }
                 }
             }
         }
         .onAppear {
-            self.harvest.loadTimeEntries()
+            harvest.loadTimeEntries()
         }
         .onReceive(timer.publisher) { _ in
-            self.harvest.loadTimeEntries()
-            self.timer.interval = self.harvest.timeEntries.contains { $0.isRunning } ? 5 : 15
+            harvest.loadTimeEntries()
+            timer.interval = harvest.timeEntries.contains { $0.isRunning } ? 10 : 30
         }
         .navigationBarTitle("Time Entries")
     }
@@ -69,14 +78,14 @@ struct TimeEntriesView : View {
     private func primaryActionButtonForTimeEntry(_ timeEntry: HarvestTimeEntry) -> some View {
         return Button(action: {
             if timeEntry.isRunning {
-                self.harvest.stopTimeEntry(timeEntry)
+                harvest.stopTimeEntry(timeEntry)
             } else {
-                self.harvest.startTimeEntryWith(client: timeEntry.client,
-                                                hours: 0,
-                                                notes: timeEntry.notes,
-                                                project: timeEntry.project,
-                                                spentDate: Date(),
-                                                task: timeEntry.task)
+                harvest.startTimeEntryWith(client: timeEntry.client,
+                                           hours: 0,
+                                           notes: timeEntry.notes,
+                                           project: timeEntry.project,
+                                           spentDate: Date(),
+                                           task: timeEntry.task)
             }
         }) {
             if timeEntry.isRunning {

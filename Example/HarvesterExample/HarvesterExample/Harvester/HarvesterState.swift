@@ -58,6 +58,24 @@ class HarvestState: ObservableObject {
         return timeEntriesByDate.keys.sorted(by: >)
     }
 
+    var timeEntryWeeklyAverage: Double {
+        guard let oldestDate = timeEntryDates.last else {
+            return 0
+        }
+
+        guard let daysSinceOldestEntry = Calendar.current.dateComponents(
+            [.day],
+            from: oldestDate,
+            to: Date()
+        ).day else {
+            return 0
+        }
+
+        let totalHours = timeEntriesByDate.reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
+        let numberOfWeeks = Double(daysSinceOldestEntry) / 7
+        return totalHours / numberOfWeeks
+    }
+
     var timeEntryTotalHoursByDate: [Date: Double] {
         var totals = [Date: Double]()
         for (date, timeEntries) in timeEntriesByDate {
@@ -89,7 +107,7 @@ class HarvestState: ObservableObject {
         let percentOfTodayCompleted = now.timeIntervalSince(todayInterval.start) / todayInterval.duration
 
         return hoursSinceSixDaysAgo + (1 - percentOfTodayCompleted) * hoursFromSevenDaysAgo
-     }
+    }
 
     var timeEntryTotalHoursThisWeek: Double {
         guard let thisWeek = Calendar.current.dateInterval(of: .weekOfYear, for: Date()) else {
@@ -285,6 +303,10 @@ class HarvestState: ObservableObject {
         api.updateTimeEntry(timeEntry) { [weak self] _ in
             self?.loadTimeEntries()
         }
+    }
+
+    func timeEntryById(_ id: Int) -> HarvestTimeEntry? {
+        timeEntries.first { $0.id == id }
     }
 }
 
