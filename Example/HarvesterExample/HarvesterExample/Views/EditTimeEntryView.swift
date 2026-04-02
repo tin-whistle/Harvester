@@ -21,6 +21,8 @@ struct EditTimeEntryView: View {
     @State private var minuteComponent: Int = 0
     @State private var timeDate: Date = Date()
 
+    @State private var spentDate: Date = Date()
+
     @State private var showingClientSheet = false
     @State private var showingProjectSheet = false
     @State private var showingTaskSheet = false
@@ -98,6 +100,7 @@ struct EditTimeEntryView: View {
 
     var body: some View {
         Form {
+            DatePicker("Date", selection: $spentDate, displayedComponents: .date)
             Button(client?.name ?? "Select a Client") {
                 self.showingClientSheet = true
             }
@@ -160,6 +163,11 @@ struct EditTimeEntryView: View {
             let hours = self.originalTimeEntry?.hours ?? 0
             self.hourComponent = hours.hourComponentFromHours()
             self.minuteComponent = hours.minuteComponentFromHours()
+            if let spentDateString = self.originalTimeEntry?.spentDate,
+                let date = DateFormatter.yyyyMMdd.date(from: spentDateString)
+            {
+                self.spentDate = date
+            }
         }
         .task {
             await harvest.loadProjectAssignments()
@@ -183,7 +191,7 @@ struct EditTimeEntryView: View {
             guard let client = client, let project = project, let task = task else { return }
             let updatedTimeEntry = HarvestTimeEntry(
                 id: originalTimeEntry.id,
-                spentDate: originalTimeEntry.spentDate,
+                spentDate: DateFormatter.yyyyMMdd.string(from: spentDate),
                 client: client,
                 project: project,
                 task: task,
@@ -200,7 +208,7 @@ struct EditTimeEntryView: View {
                 hours: hours,
                 notes: notes,
                 project: project,
-                spentDate: Date(),
+                spentDate: spentDate,
                 task: task)
         }
         show = false
