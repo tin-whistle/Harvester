@@ -4,14 +4,14 @@ import SwiftUI
 struct SelectAccountView: View {
     @Environment(HarvestState.self) var harvest
 
-    @Binding var show: Bool
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         List {
             ForEach(harvest.accounts, id: \.id) { account in
                 Button(action: {
                     self.harvest.currentAccountId = account.id
-                    self.show = false
+                    self.dismiss()
                 }) {
                     Text(account.name)
                 }
@@ -27,7 +27,7 @@ struct SelectAccountView: View {
 #if DEBUG
     struct SelectAccountView_Previews: PreviewProvider {
         static var previews: some View {
-            SelectAccountView(show: .constant(true))
+            SelectAccountView()
                 .environment(HarvestState(api: PreviewHarvester()))
         }
     }

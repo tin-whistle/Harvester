@@ -4,9 +4,7 @@ import SwiftUI
 struct MainView: View {
     @Environment(HarvestState.self) var harvest
 
-    @State private var modalSelection = ModalSelection.explore
-    @State private var showModal = false
-
+    @State private var modalSelection: ModalSelection?
 
     private var recentTasksByClient: [ClientTaskGroup] {
         let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
@@ -78,7 +76,6 @@ struct MainView: View {
             }
             Button {
                 self.modalSelection = .addTimeEntry
-                self.showModal = true
             } label: {
                 Label("New Time Entry…", systemImage: "square.and.pencil")
             }
@@ -95,11 +92,9 @@ struct MainView: View {
                 }
                 Button("Select Account") {
                     modalSelection = .selectAccount
-                    showModal = true
                 }
                 Button("Explore API") {
                     modalSelection = .explore
-                    showModal = true
                 }
             } else {
                 Button("Sign In") {
@@ -148,23 +143,24 @@ struct MainView: View {
             }
         }
         .sheet(
-            isPresented: self.$showModal,
+            item: self.$modalSelection,
             onDismiss: {
                 Task { await self.harvest.loadTimeEntries() }
             }
-        ) {
-            if self.modalSelection == .addTimeEntry {
+        ) { selection in
+            switch selection {
+            case .addTimeEntry:
                 NavigationStack {
-                    EditTimeEntryView(show: self.$showModal, originalTimeEntry: nil)
+                    EditTimeEntryView(originalTimeEntry: nil)
                         .environment(self.harvest)
                 }
-            } else if self.modalSelection == .explore {
+            case .explore:
                 NavigationStack {
                     ExploreView().environment(self.harvest)
                 }
-            } else {
+            case .selectAccount:
                 NavigationStack {
-                    SelectAccountView(show: self.$showModal).environment(self.harvest)
+                    SelectAccountView().environment(self.harvest)
                 }
             }
         }
@@ -192,10 +188,12 @@ struct MainView: View {
 
 }
 
-enum ModalSelection {
+enum ModalSelection: Identifiable {
     case addTimeEntry
     case explore
     case selectAccount
+
+    var id: Self { self }
 }
 
 private struct RecentTask: Identifiable {

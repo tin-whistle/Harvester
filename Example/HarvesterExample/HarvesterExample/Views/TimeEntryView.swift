@@ -89,7 +89,7 @@ struct TimeEntryView: View {
                 }
             ) {
                 NavigationStack {
-                    EditTimeEntryView(show: $showEditModal, originalTimeEntry: timeEntry)
+                    EditTimeEntryView(originalTimeEntry: timeEntry)
                         .environment(harvest)
                 }
             }

@@ -10,7 +10,7 @@ struct EditTimeEntryView: View {
 
     @Environment(HarvestState.self) var harvest
 
-    @Binding var show: Bool
+    @Environment(\.dismiss) private var dismiss
     let originalTimeEntry: HarvestTimeEntry?
 
     @State private var modifiedClient = Modification<HarvestClient?>.unmodified
@@ -87,7 +87,7 @@ struct EditTimeEntryView: View {
 
     var cancelButton: some View {
         Button("Cancel") {
-            self.show = false
+            self.dismiss()
         }
     }
 
@@ -211,7 +211,7 @@ struct EditTimeEntryView: View {
                 spentDate: spentDate,
                 task: task)
         }
-        show = false
+        dismiss()
     }
 
     private func buildClientActionSheet() -> ActionSheet {
@@ -284,7 +284,7 @@ struct EditTimeEntryView: View {
 
 struct EditTimeEntryView_Previews: PreviewProvider {
     static var previews: some View {
-        EditTimeEntryView(show: .constant(true), originalTimeEntry: nil)
+        EditTimeEntryView(originalTimeEntry: nil)
             .environment(HarvestState(api: PreviewHarvester()))
     }
 }
