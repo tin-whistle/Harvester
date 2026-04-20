@@ -59,12 +59,13 @@ struct TimeEntriesView: View {
                         TimeEntryView(timeEntryId: timeEntry.id)
                     }
                     .onDelete { indexSet in
+                        let dateEntries = harvest.timeEntriesByDate[date] ?? []
                         guard
                             let firstValidIndex = indexSet.first(where: {
-                                $0 < harvest.timeEntries.count
+                                $0 < dateEntries.count
                             })
                         else { return }
-                        let entryToRemove = harvest.timeEntries[firstValidIndex]
+                        let entryToRemove = dateEntries[firstValidIndex]
                         harvest.deleteTimeEntry(entryToRemove)
                     }
                 }
