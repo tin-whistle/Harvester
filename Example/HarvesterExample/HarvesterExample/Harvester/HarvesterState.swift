@@ -230,24 +230,29 @@ class HarvestState {
         spentDate: Date,
         task: HarvestTask
     ) {
-        // Perform a quick local stop of all running time entries.
-        while timeEntries.contains(where: { $0.isRunning }) {
-            if let index = timeEntries.firstIndex(where: { $0.isRunning }) {
-                let stopped = HarvestTimeEntry(
-                    id: timeEntries[index].id,
-                    spentDate: timeEntries[index].spentDate,
-                    client: timeEntries[index].client,
-                    project: timeEntries[index].project,
-                    task: timeEntries[index].task,
-                    hours: timeEntries[index].hours,
-                    notes: timeEntries[index].notes,
-                    startedTime: timeEntries[index].startedTime,
-                    endedTime: timeEntries[index].endedTime,
-                    isRunning: false)
-                timeEntries[index] = stopped
+        let isToday = Calendar.current.isDateInToday(spentDate)
+
+        if isToday {
+            // Perform a quick local stop of all running time entries.
+            while timeEntries.contains(where: { $0.isRunning }) {
+                if let index = timeEntries.firstIndex(where: { $0.isRunning }) {
+                    let stopped = HarvestTimeEntry(
+                        id: timeEntries[index].id,
+                        spentDate: timeEntries[index].spentDate,
+                        client: timeEntries[index].client,
+                        project: timeEntries[index].project,
+                        task: timeEntries[index].task,
+                        hours: timeEntries[index].hours,
+                        notes: timeEntries[index].notes,
+                        startedTime: timeEntries[index].startedTime,
+                        endedTime: timeEntries[index].endedTime,
+                        isRunning: false)
+                    timeEntries[index] = stopped
+                }
             }
         }
-        // Perform a quick local start.
+
+        // Perform a quick local insert.
         let timeEntry = HarvestTimeEntry(
             id: -Int.random(in: 1000...10000),
             spentDate: DateFormatter.yyyyMMdd.string(from: spentDate),
@@ -258,16 +263,18 @@ class HarvestState {
             notes: notes,
             startedTime: nil,
             endedTime: nil,
-            isRunning: true)
+            isRunning: isToday)
         timeEntries.insert(timeEntry, at: 0)
 
-        // Start on the server and reload.
+        // Create on the server and reload.
         Task {
             do {
                 let created = try await api.startTimeEntryWith(
                     hours: hours, notes: notes, projectId: project.id, spentDate: spentDate,
                     taskId: task.id)
-                _ = try? await api.restartTimeEntry(created)
+                if isToday {
+                    _ = try? await api.restartTimeEntry(created)
+                }
             } catch {
                 print("Failed to create time entry: \(error)")
             }
