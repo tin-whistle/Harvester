@@ -318,14 +318,39 @@ class HarvestState {
     }
 
     func updateTimeEntry(_ timeEntry: HarvestTimeEntry) {
+        // A time entry must not be running if its date is not today.
+        let isToday: Bool = {
+            guard let date = DateFormatter.yyyyMMdd.date(from: timeEntry.spentDate) else {
+                return false
+            }
+            return Calendar.current.isDateInToday(date)
+        }()
+        let needsStop = timeEntry.isRunning && !isToday
+        let entryToApply = needsStop
+            ? HarvestTimeEntry(
+                id: timeEntry.id,
+                spentDate: timeEntry.spentDate,
+                client: timeEntry.client,
+                project: timeEntry.project,
+                task: timeEntry.task,
+                hours: timeEntry.hours,
+                notes: timeEntry.notes,
+                startedTime: timeEntry.startedTime,
+                endedTime: timeEntry.endedTime,
+                isRunning: false)
+            : timeEntry
+
         // Perform a quick local update.
-        if let index = timeEntries.firstIndex(where: { $0.id == timeEntry.id }) {
-            timeEntries[index] = timeEntry
+        if let index = timeEntries.firstIndex(where: { $0.id == entryToApply.id }) {
+            timeEntries[index] = entryToApply
         }
 
         // Update on the server and reload.
         Task {
-            _ = try? await api.updateTimeEntry(timeEntry)
+            _ = try? await api.updateTimeEntry(entryToApply)
+            if needsStop {
+                _ = try? await api.stopTimeEntry(entryToApply)
+            }
             await loadTimeEntries()
         }
     }
