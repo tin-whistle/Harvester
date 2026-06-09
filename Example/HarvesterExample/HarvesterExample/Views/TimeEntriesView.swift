@@ -5,81 +5,89 @@ struct TimeEntriesView: View {
     @Environment(HarvestState.self) var harvest
 
     var body: some View {
-        List {
-            if harvest.timeEntries.count > 0 {
-                Section(
-                    header: HStack {
-                        Text("Totals")
-                            .font(.headline)
-                        Spacer()
+        ScrollViewReader { proxy in
+            List {
+                if harvest.timeEntries.count > 0 {
+                    Section(
+                        header: HStack {
+                            Text("Totals")
+                                .font(.headline)
+                            Spacer()
+                        }
+                    ) {
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("\(harvest.timeEntryWeeklyAverage.formattedHours())")
+                                    .font(.headline)
+                                Text("Weekly Average")
+                                    .font(.caption)
+                                    .lineLimit(20)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                            VStack(alignment: .center) {
+                                Text("\(harvest.timeEntryTotalHoursInLastSevenDays.formattedHours())")
+                                    .font(.headline)
+                                Text("Last 7 Days")
+                                    .font(.caption)
+                                    .lineLimit(20)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                            VStack(alignment: .trailing) {
+                                Text("\(harvest.timeEntryTotalHoursThisWeek.formattedHours())")
+                                    .font(.headline)
+                                Text("This Week")
+                                    .font(.caption)
+                                    .lineLimit(20)
+                                    .multilineTextAlignment(.trailing)
+                            }
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .trailing)
+                        }
                     }
-                ) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("\(harvest.timeEntryWeeklyAverage.formattedHours())")
+                    .id("top")
+                }
+                ForEach(harvest.timeEntryDates, id: \.timeIntervalSinceReferenceDate) { date in
+                    Section(
+                        header: HStack {
+                            Text("\(DateFormatter.harvestDateFormatter.string(from: date))")
                                 .font(.headline)
-                            Text("Weekly Average")
-                                .font(.caption)
-                                .lineLimit(20)
-                                .multilineTextAlignment(.leading)
-                        }
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                        VStack(alignment: .center) {
-                            Text("\(harvest.timeEntryTotalHoursInLastSevenDays.formattedHours())")
+                            Spacer()
+                            Text("\((harvest.timeEntryTotalHoursByDate[date] ?? 0).formattedHours())")
                                 .font(.headline)
-                            Text("Last 7 Days")
-                                .font(.caption)
-                                .lineLimit(20)
-                                .multilineTextAlignment(.center)
                         }
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
-                        VStack(alignment: .trailing) {
-                            Text("\(harvest.timeEntryTotalHoursThisWeek.formattedHours())")
-                                .font(.headline)
-                            Text("This Week")
-                                .font(.caption)
-                                .lineLimit(20)
-                                .multilineTextAlignment(.trailing)
+                    ) {
+                        ForEach(harvest.timeEntriesByDate[date] ?? [], id: \.id) { timeEntry in
+                            TimeEntryView(timeEntryId: timeEntry.id)
                         }
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .trailing)
+                        .onDelete { indexSet in
+                            let dateEntries = harvest.timeEntriesByDate[date] ?? []
+                            guard
+                                let firstValidIndex = indexSet.first(where: {
+                                    $0 < dateEntries.count
+                                })
+                            else { return }
+                            let entryToRemove = dateEntries[firstValidIndex]
+                            harvest.deleteTimeEntry(entryToRemove)
+                        }
                     }
                 }
             }
-            ForEach(harvest.timeEntryDates, id: \.timeIntervalSinceReferenceDate) { date in
-                Section(
-                    header: HStack {
-                        Text("\(DateFormatter.harvestDateFormatter.string(from: date))")
-                            .font(.headline)
-                        Spacer()
-                        Text("\((harvest.timeEntryTotalHoursByDate[date] ?? 0).formattedHours())")
-                            .font(.headline)
-                    }
-                ) {
-                    ForEach(harvest.timeEntriesByDate[date] ?? [], id: \.id) { timeEntry in
-                        TimeEntryView(timeEntryId: timeEntry.id)
-                    }
-                    .onDelete { indexSet in
-                        let dateEntries = harvest.timeEntriesByDate[date] ?? []
-                        guard
-                            let firstValidIndex = indexSet.first(where: {
-                                $0 < dateEntries.count
-                            })
-                        else { return }
-                        let entryToRemove = dateEntries[firstValidIndex]
-                        harvest.deleteTimeEntry(entryToRemove)
-                    }
-                }
-            }
-        }
-        .task {
-            await harvest.loadTimeEntries()
-            while !Task.isCancelled {
-                let interval: UInt64 =
-                    harvest.timeEntries.contains(where: { $0.isRunning })
-                    ? 10_000_000_000 : 30_000_000_000
-                try? await Task.sleep(nanoseconds: interval)
-                guard !Task.isCancelled else { break }
+            .task {
                 await harvest.loadTimeEntries()
+                while !Task.isCancelled {
+                    let interval: UInt64 =
+                        harvest.timeEntries.contains(where: { $0.isRunning })
+                        ? 10_000_000_000 : 30_000_000_000
+                    try? await Task.sleep(nanoseconds: interval)
+                    guard !Task.isCancelled else { break }
+                    await harvest.loadTimeEntries()
+                }
+            }
+            .onChange(of: harvest.restartTrigger) {
+                withAnimation {
+                    proxy.scrollTo("top", anchor: .top)
+                }
             }
         }
         .navigationTitle("Time Entries")

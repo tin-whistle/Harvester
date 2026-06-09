@@ -9,6 +9,9 @@ struct MainView: View {
     private var recentTasksByClient: [ClientTaskGroup] {
         let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         let formatter = DateFormatter.yyyyMMdd
+        // Only apply stale-data filtering once assignments have loaded; until then,
+        // treat every entry's project as still valid so the menu isn't empty.
+        let assignmentsLoaded = !harvest.projectAssignments.isEmpty
 
         // Count occurrences of each unique task within the last month.
         var countsByClient: [Int: [String: (count: Int, task: RecentTask)]] = [:]
@@ -19,7 +22,24 @@ struct MainView: View {
                 entryDate >= oneMonthAgo
             else { continue }
 
-            let key = "\(entry.project.id)-\(entry.task.id)-\(entry.notes ?? "")"
+            // Hide entries for clients that no longer exist. If the project is gone
+            // too, keep the entry only when the client has exactly one project — the
+            // auto-switch on start will fall through to that single project.
+            let clientProjects = harvest.projects(for: entry.client)
+            let projectStillExists = clientProjects.contains { $0.id == entry.project.id }
+            if assignmentsLoaded {
+                guard !clientProjects.isEmpty else { continue }
+                guard projectStillExists || clientProjects.count == 1 else { continue }
+            }
+
+            // Collapse stale duplicates: a stale entry maps onto the client's sole
+            // active project so it merges with an identical task/notes pair that
+            // already uses that project.
+            let effectiveProject =
+                projectStillExists || clientProjects.count != 1
+                ? entry.project : clientProjects[0]
+
+            let key = "\(effectiveProject.id)-\(entry.task.id)-\(entry.notes ?? "")"
             if countsByClient[entry.client.id] == nil {
                 countsByClient[entry.client.id] = [:]
                 clientOrder.append(entry.client)
@@ -31,7 +51,7 @@ struct MainView: View {
                     count: 1,
                     task: RecentTask(
                         client: entry.client,
-                        project: entry.project,
+                        project: effectiveProject,
                         task: entry.task,
                         notes: entry.notes)
                 )
@@ -167,6 +187,9 @@ struct MainView: View {
         .onChange(of: harvest.isAuthorized, initial: true) {
             if harvest.isAuthorized && harvest.userImage == nil {
                 Task { await harvest.loadUser() }
+            }
+            if harvest.isAuthorized {
+                Task { await harvest.loadProjectAssignments() }
             }
         }
         .alert("Authorization", isPresented: $harvest.showingTokenAlert) {

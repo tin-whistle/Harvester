@@ -32,6 +32,8 @@ class HarvestState {
     private(set) var timeEntryDates: [Date] = []
     private(set) var timeEntryTotalHoursByDate: [Date: Double] = [:]
 
+    private(set) var restartTrigger: Int = 0
+
     var clients: [HarvestClient] {
         Set(projectAssignments.map { $0.client }).sorted { $0.name < $1.name }
     }
@@ -230,6 +232,12 @@ class HarvestState {
         spentDate: Date,
         task: HarvestTask
     ) {
+        restartTrigger += 1
+
+        // If the requested project no longer exists for the client, fall back to the
+        // client's current project. Some clients only have a single active project at
+        // a time, so a stale entry should restart against whatever project is current.
+        let project = resolvedProject(for: client, requested: project)
         let isToday = Calendar.current.isDateInToday(spentDate)
 
         if isToday {
@@ -357,6 +365,22 @@ class HarvestState {
 
     func timeEntryById(_ id: Int) -> HarvestTimeEntry? {
         timeEntries.first { $0.id == id }
+    }
+
+    func projects(for client: HarvestClient) -> [HarvestProject] {
+        projectAssignments
+            .filter { $0.client.id == client.id }
+            .map { $0.project }
+    }
+
+    private func resolvedProject(for client: HarvestClient, requested: HarvestProject)
+        -> HarvestProject
+    {
+        let clientProjects = projects(for: client)
+        if clientProjects.contains(where: { $0.id == requested.id }) {
+            return requested
+        }
+        return clientProjects.first ?? requested
     }
 }
 
