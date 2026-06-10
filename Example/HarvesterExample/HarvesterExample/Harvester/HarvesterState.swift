@@ -105,7 +105,7 @@ class HarvestState {
 
         let hoursOnOrAfter: (Date) -> Double = { cutoff in
             self.timeEntriesByDate
-                .filter { $0.key >= cutoff }
+                .filter { $0.key >= cutoff && $0.key <= todayStart }
                 .reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
         }
 
