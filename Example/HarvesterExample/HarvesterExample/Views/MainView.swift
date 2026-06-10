@@ -6,72 +6,10 @@ struct MainView: View {
 
     @State private var modalSelection: ModalSelection?
 
-    private var recentTasksByClient: [ClientTaskGroup] {
-        let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-        let formatter = DateFormatter.yyyyMMdd
-        // Only apply stale-data filtering once assignments have loaded; until then,
-        // treat every entry's project as still valid so the menu isn't empty.
-        let assignmentsLoaded = !harvest.projectAssignments.isEmpty
-
-        // Count occurrences of each unique task within the last month.
-        var countsByClient: [Int: [String: (count: Int, task: RecentTask)]] = [:]
-        var clientOrder: [HarvestClient] = []
-
-        for entry in harvest.timeEntries {
-            guard let entryDate = formatter.date(from: entry.spentDate),
-                entryDate >= oneMonthAgo
-            else { continue }
-
-            // Hide entries for clients that no longer exist. If the project is gone
-            // too, keep the entry only when the client has exactly one project — the
-            // auto-switch on start will fall through to that single project.
-            let clientProjects = harvest.projects(for: entry.client)
-            let projectStillExists = clientProjects.contains { $0.id == entry.project.id }
-            if assignmentsLoaded {
-                guard !clientProjects.isEmpty else { continue }
-                guard projectStillExists || clientProjects.count == 1 else { continue }
-            }
-
-            // Collapse stale duplicates: a stale entry maps onto the client's sole
-            // active project so it merges with an identical task/notes pair that
-            // already uses that project.
-            let effectiveProject =
-                projectStillExists || clientProjects.count != 1
-                ? entry.project : clientProjects[0]
-
-            let key = "\(effectiveProject.id)-\(entry.task.id)-\(entry.notes ?? "")"
-            if countsByClient[entry.client.id] == nil {
-                countsByClient[entry.client.id] = [:]
-                clientOrder.append(entry.client)
-            }
-            if let existing = countsByClient[entry.client.id]![key] {
-                countsByClient[entry.client.id]![key] = (count: existing.count + 1, task: existing.task)
-            } else {
-                countsByClient[entry.client.id]![key] = (
-                    count: 1,
-                    task: RecentTask(
-                        client: entry.client,
-                        project: effectiveProject,
-                        task: entry.task,
-                        notes: entry.notes)
-                )
-            }
-        }
-
-        // Return the top 5 most-used tasks per client.
-        return clientOrder.map { client in
-            let sorted = (countsByClient[client.id] ?? [:]).values
-                .sorted { $0.count > $1.count }
-                .prefix(5)
-                .map { $0.task }
-            return ClientTaskGroup(client: client, tasks: sorted)
-        }
-    }
-
     var addButton: some View {
         Menu {
             if !harvest.timeEntries.isEmpty {
-                ForEach(recentTasksByClient) { group in
+                ForEach(harvest.recentTasksByClient()) { group in
                     Section(group.client.name) {
                         ForEach(group.tasks) { recentTask in
                             Button {
@@ -217,20 +155,6 @@ enum ModalSelection: Identifiable {
     case selectAccount
 
     var id: Self { self }
-}
-
-private struct RecentTask: Identifiable {
-    let client: HarvestClient
-    let project: HarvestProject
-    let task: HarvestTask
-    let notes: String?
-    var id: String { "\(client.id)-\(project.id)-\(task.id)-\(notes ?? "")" }
-}
-
-private struct ClientTaskGroup: Identifiable {
-    let client: HarvestClient
-    let tasks: [RecentTask]
-    var id: Int { client.id }
 }
 
 #if DEBUG

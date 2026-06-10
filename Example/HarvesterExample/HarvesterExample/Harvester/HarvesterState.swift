@@ -32,7 +32,9 @@ class HarvestState {
     private(set) var timeEntryDates: [Date] = []
     private(set) var timeEntryTotalHoursByDate: [Date: Double] = [:]
 
-    private(set) var restartTrigger: Int = 0
+    /// Monotonic counter incremented whenever a new time entry is started, used
+    /// by `TimeEntriesView` as an observable signal to scroll its list to the top.
+    private(set) var scrollToTopRequest: Int = 0
 
     var clients: [HarvestClient] {
         Set(projectAssignments.map { $0.client }).sorted { $0.name < $1.name }
@@ -91,28 +93,24 @@ class HarvestState {
     }
 
     var timeEntryTotalHoursInLastSevenDays: Double {
+        let calendar = Calendar.current
         let now = Date()
-        guard let sixDaysAgoExactly = Calendar.current.date(byAdding: .day, value: -6, to: now),
-            let sixDaysAgoStartOfDay = DateFormatter.yyyyMMdd.date(
-                from: DateFormatter.yyyyMMdd.string(from: sixDaysAgoExactly)),
-            let sevenDaysAgoExactly = Calendar.current.date(byAdding: .day, value: -7, to: now),
-            let sevenDaysAgoStartOfDay = DateFormatter.yyyyMMdd.date(
-                from: DateFormatter.yyyyMMdd.string(from: sevenDaysAgoExactly)),
-            let todayInterval = Calendar.current.dateInterval(of: .day, for: now)
+        let todayStart = calendar.startOfDay(for: now)
+        guard let sixDaysAgoStartOfDay = calendar.date(byAdding: .day, value: -6, to: todayStart),
+            let sevenDaysAgoStartOfDay = calendar.date(byAdding: .day, value: -7, to: todayStart),
+            let todayInterval = calendar.dateInterval(of: .day, for: now)
         else {
             return 0
         }
 
-        let hoursSinceSixDaysAgo =
-            timeEntriesByDate
-            .filter { $0.key >= sixDaysAgoStartOfDay }
-            .reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
+        let hoursOnOrAfter: (Date) -> Double = { cutoff in
+            self.timeEntriesByDate
+                .filter { $0.key >= cutoff }
+                .reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
+        }
 
-        let hoursSinceSevenDaysAgo =
-            timeEntriesByDate
-            .filter { $0.key >= sevenDaysAgoStartOfDay }
-            .reduce(0) { $0 + $1.value.reduce(0) { $0 + $1.hours } }
-
+        let hoursSinceSixDaysAgo = hoursOnOrAfter(sixDaysAgoStartOfDay)
+        let hoursSinceSevenDaysAgo = hoursOnOrAfter(sevenDaysAgoStartOfDay)
         let hoursFromSevenDaysAgo = hoursSinceSevenDaysAgo - hoursSinceSixDaysAgo
 
         let percentOfTodayCompleted =
@@ -220,7 +218,7 @@ class HarvestState {
         do {
             let user = try await api.getMe()
             self.user = user
-            let (data, _) = try await URLSession.shared.data(from: user.avatarURL)
+            let (data, _) = try await URLSession.shared.data(from: user.avatarUrl)
             self.userImage = UIImage(data: data)
         } catch {
             print("Failed to load user: \(error)")
@@ -232,7 +230,7 @@ class HarvestState {
         spentDate: Date,
         task: HarvestTask
     ) {
-        restartTrigger += 1
+        scrollToTopRequest += 1
 
         // If the requested project no longer exists for the client, fall back to the
         // client's current project. Some clients only have a single active project at
@@ -242,21 +240,8 @@ class HarvestState {
 
         if isToday {
             // Perform a quick local stop of all running time entries.
-            while timeEntries.contains(where: { $0.isRunning }) {
-                if let index = timeEntries.firstIndex(where: { $0.isRunning }) {
-                    let stopped = HarvestTimeEntry(
-                        id: timeEntries[index].id,
-                        spentDate: timeEntries[index].spentDate,
-                        client: timeEntries[index].client,
-                        project: timeEntries[index].project,
-                        task: timeEntries[index].task,
-                        hours: timeEntries[index].hours,
-                        notes: timeEntries[index].notes,
-                        startedTime: timeEntries[index].startedTime,
-                        endedTime: timeEntries[index].endedTime,
-                        isRunning: false)
-                    timeEntries[index] = stopped
-                }
+            while let index = indexOfRunningTimeEntry() {
+                timeEntries[index] = timeEntries[index].stopped()
             }
         }
 
@@ -292,19 +277,8 @@ class HarvestState {
 
     func stopTimeEntry(_ timeEntry: HarvestTimeEntry) {
         // Perform a quick local stop.
-        if let index = timeEntries.firstIndex(where: { $0.id == timeEntry.id }) {
-            let stopped = HarvestTimeEntry(
-                id: timeEntry.id,
-                spentDate: timeEntry.spentDate,
-                client: timeEntry.client,
-                project: timeEntry.project,
-                task: timeEntry.task,
-                hours: timeEntry.hours,
-                notes: timeEntry.notes,
-                startedTime: timeEntry.startedTime,
-                endedTime: timeEntry.endedTime,
-                isRunning: false)
-            timeEntries[index] = stopped
+        if let index = indexOfTimeEntry(id: timeEntry.id) {
+            timeEntries[index] = timeEntry.stopped()
         }
 
         // Stop on the server and reload.
@@ -327,29 +301,11 @@ class HarvestState {
 
     func updateTimeEntry(_ timeEntry: HarvestTimeEntry) {
         // A time entry must not be running if its date is not today.
-        let isToday: Bool = {
-            guard let date = DateFormatter.yyyyMMdd.date(from: timeEntry.spentDate) else {
-                return false
-            }
-            return Calendar.current.isDateInToday(date)
-        }()
-        let needsStop = timeEntry.isRunning && !isToday
-        let entryToApply = needsStop
-            ? HarvestTimeEntry(
-                id: timeEntry.id,
-                spentDate: timeEntry.spentDate,
-                client: timeEntry.client,
-                project: timeEntry.project,
-                task: timeEntry.task,
-                hours: timeEntry.hours,
-                notes: timeEntry.notes,
-                startedTime: timeEntry.startedTime,
-                endedTime: timeEntry.endedTime,
-                isRunning: false)
-            : timeEntry
+        let needsStop = timeEntry.isRunning && !isToday(spentDateString: timeEntry.spentDate)
+        let entryToApply = needsStop ? timeEntry.stopped() : timeEntry
 
         // Perform a quick local update.
-        if let index = timeEntries.firstIndex(where: { $0.id == entryToApply.id }) {
+        if let index = indexOfTimeEntry(id: entryToApply.id) {
             timeEntries[index] = entryToApply
         }
 
@@ -367,10 +323,38 @@ class HarvestState {
         timeEntries.first { $0.id == id }
     }
 
+    var hasRunningTimeEntry: Bool {
+        timeEntries.contains { $0.isRunning }
+    }
+
+    private func indexOfTimeEntry(id: Int) -> Int? {
+        timeEntries.firstIndex { $0.id == id }
+    }
+
+    private func indexOfRunningTimeEntry() -> Int? {
+        timeEntries.firstIndex { $0.isRunning }
+    }
+
+    private func isToday(spentDateString: String) -> Bool {
+        guard let date = DateFormatter.yyyyMMdd.date(from: spentDateString) else {
+            return false
+        }
+        return Calendar.current.isDateInToday(date)
+    }
+
     func projects(for client: HarvestClient) -> [HarvestProject] {
         projectAssignments
             .filter { $0.client.id == client.id }
             .map { $0.project }
+            .sorted { $0.name < $1.name }
+    }
+
+    func tasks(for client: HarvestClient, project: HarvestProject) -> [HarvestTask] {
+        projectAssignments
+            .filter { $0.client.id == client.id && $0.project.id == project.id }
+            .flatMap { $0.taskAssignments }
+            .map { $0.task }
+            .sorted { $0.name < $1.name }
     }
 
     private func resolvedProject(for client: HarvestClient, requested: HarvestProject)
@@ -382,13 +366,83 @@ class HarvestState {
         }
         return clientProjects.first ?? requested
     }
+
+    /// The top recent (project, task, notes) tuples per client over the last `windowDays`,
+    /// limited to `perClientLimit` rows per client. Applies stale-project collapse via
+    /// `resolvedProject(for:requested:)` once `projectAssignments` have loaded.
+    func recentTasksByClient(
+        now: Date = Date(),
+        windowDays: Int = 30,
+        perClientLimit: Int = 5
+    ) -> [ClientTaskGroup] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -windowDays, to: now) ?? now
+        let formatter = DateFormatter.yyyyMMdd
+        // Only apply stale-data filtering once assignments have loaded; until then,
+        // treat every entry's project as still valid so the menu isn't empty.
+        let assignmentsLoaded = !projectAssignments.isEmpty
+
+        var countsByClient: [Int: [String: (count: Int, task: RecentTask)]] = [:]
+        var clientOrder: [HarvestClient] = []
+
+        for entry in timeEntries {
+            guard let entryDate = formatter.date(from: entry.spentDate),
+                entryDate >= cutoff
+            else { continue }
+
+            // Hide entries for clients that no longer exist. If the project is gone
+            // too, keep the entry only when the client has exactly one project — the
+            // auto-switch on start will fall through to that single project.
+            let clientProjects = projects(for: entry.client)
+            let projectStillExists = clientProjects.contains { $0.id == entry.project.id }
+            if assignmentsLoaded {
+                guard !clientProjects.isEmpty else { continue }
+                guard projectStillExists || clientProjects.count == 1 else { continue }
+            }
+
+            // Collapse stale duplicates onto the client's sole active project so
+            // identical (task, notes) pairs that already use it merge together.
+            let effectiveProject = resolvedProject(for: entry.client, requested: entry.project)
+
+            let key = "\(effectiveProject.id)-\(entry.task.id)-\(entry.notes ?? "")"
+            if countsByClient[entry.client.id] == nil {
+                countsByClient[entry.client.id] = [:]
+                clientOrder.append(entry.client)
+            }
+            if let existing = countsByClient[entry.client.id]![key] {
+                countsByClient[entry.client.id]![key] =
+                    (count: existing.count + 1, task: existing.task)
+            } else {
+                countsByClient[entry.client.id]![key] = (
+                    count: 1,
+                    task: RecentTask(
+                        client: entry.client,
+                        project: effectiveProject,
+                        task: entry.task,
+                        notes: entry.notes)
+                )
+            }
+        }
+
+        return clientOrder.map { client in
+            let sorted = (countsByClient[client.id] ?? [:]).values
+                .sorted { $0.count > $1.count }
+                .prefix(perClientLimit)
+                .map { $0.task }
+            return ClientTaskGroup(client: client, tasks: Array(sorted))
+        }
+    }
 }
 
-extension DateFormatter {
-    static let yyyyMMdd: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withYear, .withMonth, .withDay, .withDashSeparatorInDate]
-        formatter.timeZone = TimeZone.current
-        return formatter
-    }()
+struct RecentTask: Identifiable {
+    let client: HarvestClient
+    let project: HarvestProject
+    let task: HarvestTask
+    let notes: String?
+    var id: String { "\(client.id)-\(project.id)-\(task.id)-\(notes ?? "")" }
+}
+
+struct ClientTaskGroup: Identifiable {
+    let client: HarvestClient
+    let tasks: [RecentTask]
+    var id: Int { client.id }
 }

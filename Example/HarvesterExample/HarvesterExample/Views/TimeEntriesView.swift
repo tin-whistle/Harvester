@@ -62,13 +62,9 @@ struct TimeEntriesView: View {
                         }
                         .onDelete { indexSet in
                             let dateEntries = harvest.timeEntriesByDate[date] ?? []
-                            guard
-                                let firstValidIndex = indexSet.first(where: {
-                                    $0 < dateEntries.count
-                                })
-                            else { return }
-                            let entryToRemove = dateEntries[firstValidIndex]
-                            harvest.deleteTimeEntry(entryToRemove)
+                            indexSet
+                                .compactMap { dateEntries.indices.contains($0) ? dateEntries[$0] : nil }
+                                .forEach(harvest.deleteTimeEntry)
                         }
                     }
                 }
@@ -76,15 +72,14 @@ struct TimeEntriesView: View {
             .task {
                 await harvest.loadTimeEntries()
                 while !Task.isCancelled {
-                    let interval: UInt64 =
-                        harvest.timeEntries.contains(where: { $0.isRunning })
+                    let interval: UInt64 = harvest.hasRunningTimeEntry
                         ? 10_000_000_000 : 30_000_000_000
                     try? await Task.sleep(nanoseconds: interval)
                     guard !Task.isCancelled else { break }
                     await harvest.loadTimeEntries()
                 }
             }
-            .onChange(of: harvest.restartTrigger) {
+            .onChange(of: harvest.scrollToTopRequest) {
                 withAnimation {
                     proxy.scrollTo("top", anchor: .top)
                 }

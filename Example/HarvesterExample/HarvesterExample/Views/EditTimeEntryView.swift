@@ -3,23 +3,17 @@ import SwiftUI
 
 struct EditTimeEntryView: View {
 
-    enum Modification<T> {
-        case modified(_: T)
-        case unmodified
-    }
-
     @Environment(HarvestState.self) var harvest
 
     @Environment(\.dismiss) private var dismiss
     let originalTimeEntry: HarvestTimeEntry?
 
-    @State private var modifiedClient = Modification<HarvestClient?>.unmodified
-    @State private var modifiedProject = Modification<HarvestProject?>.unmodified
-    @State private var modifiedTask = Modification<HarvestTask?>.unmodified
+    @State private var client: HarvestClient?
+    @State private var project: HarvestProject?
+    @State private var task: HarvestTask?
     @State private var notes: String = ""
     @State private var hourComponent: Int = 0
     @State private var minuteComponent: Int = 0
-    @State private var timeDate: Date = Date()
 
     @State private var spentDate: Date = Date()
 
@@ -27,33 +21,6 @@ struct EditTimeEntryView: View {
     @State private var showingProjectSheet = false
     @State private var showingTaskSheet = false
     @State private var showingNotesAlert = false
-
-    var client: HarvestClient? {
-        switch modifiedClient {
-        case .modified(let client):
-            return client
-        case .unmodified:
-            return originalTimeEntry?.client
-        }
-    }
-
-    var project: HarvestProject? {
-        switch modifiedProject {
-        case .modified(let project):
-            return project
-        case .unmodified:
-            return originalTimeEntry?.project
-        }
-    }
-
-    var task: HarvestTask? {
-        switch modifiedTask {
-        case .modified(let task):
-            return task
-        case .unmodified:
-            return originalTimeEntry?.task
-        }
-    }
 
     var hours: Double {
         Double(hourComponent) + Double(minuteComponent) / 60
@@ -64,25 +31,17 @@ struct EditTimeEntryView: View {
     }
 
     var clients: [HarvestClient] {
-        Set(harvest.projectAssignments.map { $0.client }).sorted { $0.name < $1.name }
+        harvest.clients
     }
 
     var projects: [HarvestProject] {
-        guard let client = client else { return [] }
-        return harvest.projectAssignments
-            .filter { $0.client.id == client.id }
-            .map { $0.project }
-            .sorted { $0.name < $1.name }
+        guard let client else { return [] }
+        return harvest.projects(for: client)
     }
 
     var tasks: [HarvestTask] {
-        guard let client = client else { return [] }
-        guard let project = project else { return [] }
-        return harvest.projectAssignments
-            .filter { $0.client.id == client.id && $0.project.id == project.id }
-            .flatMap { $0.taskAssignments }
-            .map { $0.task }
-            .sorted { $0.name < $1.name }
+        guard let client, let project else { return [] }
+        return harvest.tasks(for: client, project: project)
     }
 
     var cancelButton: some View {
@@ -168,6 +127,9 @@ struct EditTimeEntryView: View {
             {
                 self.spentDate = date
             }
+            self.client = self.originalTimeEntry?.client
+            self.project = self.originalTimeEntry?.project
+            self.task = self.originalTimeEntry?.task
         }
         .task {
             await harvest.loadProjectAssignments()
@@ -187,8 +149,8 @@ struct EditTimeEntryView: View {
     }
 
     private func save() {
-        if let originalTimeEntry = originalTimeEntry {
-            guard let client = client, let project = project, let task = task else { return }
+        guard let client, let project, let task else { return }
+        if let originalTimeEntry {
             let updatedTimeEntry = HarvestTimeEntry(
                 id: originalTimeEntry.id,
                 spentDate: DateFormatter.yyyyMMdd.string(from: spentDate),
@@ -202,7 +164,6 @@ struct EditTimeEntryView: View {
                 isRunning: originalTimeEntry.isRunning)
             harvest.updateTimeEntry(updatedTimeEntry)
         } else {
-            guard let client = client, let project = project, let task = task else { return }
             harvest.startTimeEntryWith(
                 client: client,
                 hours: hours,
@@ -217,9 +178,9 @@ struct EditTimeEntryView: View {
     private func buildClientActionSheet() -> ActionSheet {
         buildActionSheet(title: "Select a Client", items: clients) { client in
             ActionSheet.Button.default(Text(client.name)) {
-                self.modifiedClient = .modified(client)
-                self.modifiedProject = .modified(nil)
-                self.modifiedTask = .modified(nil)
+                self.client = client
+                self.project = nil
+                self.task = nil
                 self.notes = ""
                 self.selectProject()
             }
@@ -229,8 +190,8 @@ struct EditTimeEntryView: View {
     private func buildProjectActionSheet() -> ActionSheet {
         buildActionSheet(title: "Select a Project", items: projects) { project in
             ActionSheet.Button.default(Text(project.name)) {
-                self.modifiedProject = .modified(project)
-                self.modifiedTask = .modified(nil)
+                self.project = project
+                self.task = nil
                 self.notes = ""
                 self.selectTask()
             }
@@ -240,7 +201,7 @@ struct EditTimeEntryView: View {
     private func buildTaskActionSheet() -> ActionSheet {
         buildActionSheet(title: "Select a Task", items: tasks) { task in
             ActionSheet.Button.default(Text(task.name)) {
-                self.modifiedTask = .modified(task)
+                self.task = task
                 self.notes = ""
             }
         }
@@ -257,7 +218,7 @@ struct EditTimeEntryView: View {
 
     private func selectClient() {
         if self.clients.count == 1 {
-            self.modifiedClient = .modified(self.clients.first)
+            self.client = self.clients.first
             self.selectProject()
         } else {
             self.showingClientSheet = true
@@ -266,7 +227,7 @@ struct EditTimeEntryView: View {
 
     private func selectProject() {
         if self.projects.count == 1 {
-            self.modifiedProject = .modified(self.projects.first)
+            self.project = self.projects.first
             self.selectTask()
         } else {
             self.showingProjectSheet = true
@@ -275,7 +236,7 @@ struct EditTimeEntryView: View {
 
     private func selectTask() {
         if self.tasks.count == 1 {
-            self.modifiedTask = .modified(self.tasks.first)
+            self.task = self.tasks.first
         } else {
             self.showingTaskSheet = true
         }
