@@ -1,33 +1,22 @@
 import Foundation
 
-struct UpdateTimeEntryRequest: NetworkRequest, Encodable {
+struct UpdateTimeEntryRequest: NetworkRequest {
     typealias Response = HarvestTimeEntry
 
     var endpoint: NetworkEndpoint
     var method: HTTPMethod {
-        .patch(self)
+        .patch(payload)
     }
 
-    let hours: Double
-    let notes: String?
-    let projectId: Int
-    let spentDate: String
-    let taskId: Int
+    let payload: TimeEntryPayload
 
     init(timeEntry: HarvestTimeEntry) {
         endpoint = .pathFromBaseURL("/time_entries/\(timeEntry.id)")
-        self.hours = timeEntry.hours
-        self.notes = timeEntry.notes
-        self.projectId = timeEntry.project.id
-        self.spentDate = timeEntry.spentDate
-        self.taskId = timeEntry.task.id
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case hours = "hours"
-        case notes = "notes"
-        case projectId = "project_id"
-        case spentDate = "spent_date"
-        case taskId = "task_id"
+        payload = TimeEntryPayload(
+            hours: timeEntry.hours,
+            notes: timeEntry.notes,
+            projectId: timeEntry.project.id,
+            spentDate: timeEntry.spentDate,
+            taskId: timeEntry.task.id)
     }
 }

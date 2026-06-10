@@ -9,8 +9,4 @@ struct TimeEntriesRequest: NetworkRequest {
 
 public struct TimeEntriesResponse: Decodable {
     let timeEntries: [HarvestTimeEntry]
-
-    enum CodingKeys: String, CodingKey {
-        case timeEntries = "time_entries"
-    }
 }

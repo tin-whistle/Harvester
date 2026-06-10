@@ -18,23 +18,14 @@ public struct HarvestCompany: Decodable, Sendable {
     public let estimateFeature: Bool
     public let approvalFeature: Bool
 
+    // Raw values are post-`.convertFromSnakeCase` camelCase. Only `baseURL`
+    // needs an explicit override (JSON `base_uri` → `baseUri`, which differs
+    // from the URL-acronym property name).
     enum CodingKeys: String, CodingKey {
-        case baseURL = "base_uri"
-        case fullDomain = "full_domain"
-        case name = "name"
-        case isActive = "is_active"
-        case weekStartDay = "week_start_day"
-        case wantsTimestampTimers = "wants_timestamp_timers"
-        case timeFormat = "time_format"
-        case planType = "plan_type"
-        case clock = "clock"
-        case decimalSymbol = "decimal_symbol"
-        case thousandsSeparator = "thousands_separator"
-        case colorScheme = "color_scheme"
-        case expenseFeature = "expense_feature"
-        case invoiceFeature = "invoice_feature"
-        case estimateFeature = "estimate_feature"
-        case approvalFeature = "approval_feature"
+        case baseURL = "baseUri"
+        case fullDomain, name, isActive, weekStartDay, wantsTimestampTimers
+        case timeFormat, planType, clock, decimalSymbol, thousandsSeparator
+        case colorScheme, expenseFeature, invoiceFeature, estimateFeature, approvalFeature
     }
 
     public enum WeekStartDay: String, Codable, Sendable {

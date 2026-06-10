@@ -12,8 +12,4 @@ struct UserProjectAssignmentsRequest: NetworkRequest {
 
 struct UserProjectAssignmentsResponse: Decodable {
     let projectAssignments: [HarvestProjectAssignment]
-
-    enum CodingKeys: String, CodingKey {
-        case projectAssignments = "project_assignments"
-    }
 }

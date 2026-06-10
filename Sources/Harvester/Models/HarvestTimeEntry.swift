@@ -15,19 +15,12 @@ public struct HarvestTimeEntry: Decodable, Equatable, Identifiable, Sendable {
     public let isRunning: Bool
     public private(set) var isDirty: Bool = false
 
+    // `isDirty` is local-only state, never carried on the wire. Declaring CodingKeys
+    // explicitly excludes it from the synthesized decoder. The camelCase raw values
+    // pair with `JSONDecoder.keyDecodingStrategy = .convertFromSnakeCase`.
     enum CodingKeys: String, CodingKey {
-        case id = "id"
-        case spentDate = "spent_date"
-        case client = "client"
-        case project = "project"
-        case task = "task"
-        //        case taskAssignment = "task_assignment"
-        case hours = "hours"
-        case notes = "notes"
-        //        case timerStartedAt = "timer_started_at"
-        case startedTime = "started_time"
-        case endedTime = "ended_time"
-        case isRunning = "is_running"
+        case id, spentDate, client, project, task, hours, notes
+        case startedTime, endedTime, isRunning
     }
 
     public init(
@@ -53,5 +46,19 @@ public struct HarvestTimeEntry: Decodable, Equatable, Identifiable, Sendable {
         self.endedTime = endedTime
         self.isRunning = isRunning
         isDirty = true
+    }
+
+    public func stopped() -> HarvestTimeEntry {
+        HarvestTimeEntry(
+            id: id,
+            spentDate: spentDate,
+            client: client,
+            project: project,
+            task: task,
+            hours: hours,
+            notes: notes,
+            startedTime: startedTime,
+            endedTime: endedTime,
+            isRunning: false)
     }
 }

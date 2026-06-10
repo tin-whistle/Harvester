@@ -66,7 +66,9 @@ extension HarvestNetworkClient {
         case .patch(let body), .post(let body):
             if let body = body {
                 do {
-                    bodyData = try JSONEncoder().encode(AnyEncodable(body))
+                    let encoder = JSONEncoder()
+                    encoder.keyEncodingStrategy = .convertToSnakeCase
+                    bodyData = try encoder.encode(AnyEncodable(body))
                     headers["Content-Type"] = "application/json"
                 } catch {
                     throw HarvestError.encoding(error)
@@ -95,7 +97,9 @@ extension HarvestNetworkClient {
 
         do {
             print("\(id): Got response: \(String(data: data, encoding: .utf8) ?? "undecodable")")
-            let response = try JSONDecoder().decode(T.Response.self, from: data)
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let response = try decoder.decode(T.Response.self, from: data)
             return response
         } catch {
             throw HarvestError.decoding(error)
